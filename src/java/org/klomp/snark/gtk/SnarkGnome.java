@@ -18,7 +18,7 @@
  * Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-package org.klomp.snark;
+package org.klomp.snark.gtk;
 
 import org.gnu.glib.Fireable;
 import org.gnu.glib.Timer;
@@ -41,6 +41,16 @@ import org.gnu.gtk.event.LifeCycleEvent;
 import org.gnu.gtk.event.LifeCycleListener;
 import org.gnu.gtk.event.MenuItemEvent;
 import org.gnu.gtk.event.MenuItemListener;
+
+import org.klomp.snark.CoordinatorListener;
+import org.klomp.snark.Peer;
+import org.klomp.snark.PeerCoordinator;
+import org.klomp.snark.Snark;
+import org.klomp.snark.SnarkShutdown;
+import org.klomp.snark.ShutdownListener;
+import org.klomp.snark.Storage;
+import org.klomp.snark.StorageListener;
+
 
 /**
  * Main Snark program startup class that uses a Gnome UI.

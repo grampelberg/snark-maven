@@ -24,7 +24,7 @@ package org.klomp.snark;
 /**
  * Callback for end of shutdown sequence.
  */
-interface ShutdownListener
+public interface ShutdownListener
 {
     /**
      * Called when the SnarkShutdown hook has finished shutting down all

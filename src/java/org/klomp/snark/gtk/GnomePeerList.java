@@ -19,7 +19,7 @@
  * Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-package org.klomp.snark;
+package org.klomp.snark.gtk;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,6 +40,11 @@ import org.gnu.gtk.Window;
 import org.gnu.gtk.WindowType;
 import org.gnu.gtk.event.LifeCycleEvent;
 import org.gnu.gtk.event.LifeCycleListener;
+
+import org.klomp.snark.Peer;
+import org.klomp.snark.PeerCoordinator;
+import org.klomp.snark.PeerID;
+import org.klomp.snark.Snark;
 
 /**
  * Window that show the currently connected peers.

@@ -18,7 +18,7 @@
  * Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-package org.klomp.snark;
+package org.klomp.snark.gtk;
 
 import org.gnu.gtk.Button;
 import org.gnu.gtk.GtkStockItem;
@@ -35,6 +35,8 @@ import org.gnu.gtk.event.ButtonEvent;
 import org.gnu.gtk.event.ButtonListener;
 import org.gnu.gtk.event.LifeCycleEvent;
 import org.gnu.gtk.event.LifeCycleListener;
+
+import org.klomp.snark.Snark;
 
 /**
  * Show a Gnome window with the properties of the file being shared.

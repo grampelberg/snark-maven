@@ -56,7 +56,7 @@ public class PeerCoordinator implements PeerListener
     private long downloaded;
 
     // synchronize on this when changing peers or downloaders
-    final List<Peer> peers = new ArrayList<Peer>();
+    public final List<Peer> peers = new ArrayList<Peer>();
 
     /** Timer to handle all periodical tasks. */
     private final Timer timer = new Timer(true);

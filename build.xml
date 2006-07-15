@@ -77,7 +77,6 @@
   <!-- cleans out the installed application -->
   <target name="clean">
     <delete dir="${deploy.dir}"/>
-    <ant dir="tests" target="clean"/>
   </target>
 
   <!-- build the java class files -->
