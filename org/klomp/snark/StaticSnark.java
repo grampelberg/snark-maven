@@ -23,8 +23,6 @@ package org.klomp.snark;
 import java.security.Provider;
 import java.security.Security;
 
-import org.klomp.snark.bencode.*;
-
 /**
  * Main snark startup class for staticly linking with gcj.
  * It references somee necessary classes that are normally loaded through
@@ -34,14 +32,20 @@ import org.klomp.snark.bencode.*;
  */
 public class StaticSnark
 {
-  public static void main(String[] args)
-  {
-    // The GNU security provider is needed for SHA-1 MessageDigest checking.
-    // So make sure it is available as a security provider.
-    Provider gnu = new gnu.java.security.provider.Gnu();
-    Security.addProvider(gnu);
+    public static void main(String[] args)
+    {
+        try {
+            // The GNU security provider is needed for SHA-1 MessageDigest
+            // checking.  So make sure it is available as a security provider.
+            Provider gnu = (Provider)Class.forName(
+                "gnu.java.security.provider.Gnu").newInstance();
+            Security.addProvider(gnu);
+        } catch (Exception e) {
+            System.err.println("Unable to load GNU security provider");
+            System.exit(-1);
+        }
 
-    // And finally call the normal starting point.
-    Snark.main(args);
-  }
+        // And finally call the normal starting point.
+        Snark.main(args);
+    }
 }

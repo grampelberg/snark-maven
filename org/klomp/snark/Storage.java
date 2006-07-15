@@ -1,525 +1,512 @@
-/* Storage - Class used to store and retrieve pieces.
-   Copyright (C) 2003 Mark J. Wielaard
-
-   This file is part of Snark.
-   
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
- 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
- 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-*/
+/*
+ * Storage - Class used to store and retrieve pieces. Copyright (C) 2003 Mark J.
+ * Wielaard
+ * 
+ * This file is part of Snark.
+ * 
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 2, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+ * Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 
 package org.klomp.snark;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * Maintains pieces on disk. Can be used to store and retrieve pieces.
  */
 public class Storage
 {
-  private MetaInfo metainfo;
-  private long[] lengths;
-  private RandomAccessFile[] rafs;
-  private String[] names;
+    private MetaInfo metainfo;
 
-  private final StorageListener listener;
+    private long[] lengths;
 
-  private final BitField bitfield;
-  private int needed;
+    private RandomAccessFile[] rafs;
 
-  // XXX - Not always set correctly
-  int piece_size;
-  int pieces;
+    private String[] names;
 
-  /** The default piece size. */
-  private static int MIN_PIECE_SIZE = 256*1024;
-  /** The maximum number of pieces in a torrent. */
-  private static long MAX_PIECES = 100*1024/20;
+    private final StorageListener listener;
 
-  /**
-   * Creates a new storage based on the supplied MetaInfo.  This will
-   * try to create and/or check all needed files in the MetaInfo.
-   *
-   * @exception IOException when creating and/or checking files fails.
-   */
-  public Storage(MetaInfo metainfo, StorageListener listener)
-    throws IOException
-  {
-    this.metainfo = metainfo;
-    this.listener = listener;
-    needed = metainfo.getPieces();
-    bitfield = new BitField(needed);
-  }
+    private final BitField bitfield;
 
-  /**
-   * Creates a storage from the existing file or directory together
-   * with an appropriate MetaInfo file as can be announced on the
-   * given announce String location.
-   */
-  public Storage(File baseFile, String announce, StorageListener listener)
-    throws IOException
-  {
-    this.listener = listener;
+    private int needed;
 
-    // Create names, rafs and lengths arrays.
-    getFiles(baseFile);
-    
-    long total = 0;
-    ArrayList lengthsList = new ArrayList();
-    for (int i = 0; i < lengths.length; i++)
-      {
-	long length = lengths[i];
-	total += length;
-	lengthsList.add(new Long(length));
-      }
+    // XXX - Not always set correctly
+    int piece_size;
 
-    piece_size = MIN_PIECE_SIZE;
-    pieces = (int) ((total - 1)/piece_size) + 1;
-    while (pieces > MAX_PIECES)
-      {
-	piece_size = piece_size*2;
-	pieces = (int) ((total - 1)/piece_size) +1;
-      }
+    int pieces;
 
-    // Note that piece_hashes and the bitfield will be filled after
-    // the MetaInfo is created.
-    byte[] piece_hashes = new byte[20*pieces];
-    bitfield = new BitField(pieces);
-    needed = 0;
+    /** The default piece size. */
+    private static int MIN_PIECE_SIZE = 256 * 1024;
 
-    List files = new ArrayList();
-    for (int i = 0; i < names.length; i++)
-      {
-	List file = new ArrayList();
-	StringTokenizer st = new StringTokenizer(names[i], File.separator);
-	while (st.hasMoreTokens())
-	  {
-	    String part = st.nextToken();
-	    file.add(part);
-	  }
-	files.add(file);
-      }
+    /** The maximum number of pieces in a torrent. */
+    private static long MAX_PIECES = 100 * 1024 / 20;
 
-    String name = baseFile.getName();
-    if (files.size() == 1)
-      {
-	files = null;
-	lengthsList = null;
-      }
+    /**
+     * Creates a new storage based on the supplied MetaInfo. This will try to
+     * create and/or check all needed files in the MetaInfo.
+     * 
+     * @exception IOException
+     *                when creating and/or checking files fails.
+     */
+    public Storage(MetaInfo metainfo, StorageListener listener)
+            throws IOException
+    {
+        this.metainfo = metainfo;
+        this.listener = listener;
+        needed = metainfo.getPieces();
+        bitfield = new BitField(needed);
+    }
 
-    // Note that the piece_hashes are not correctly setup yet.
-    metainfo = new MetaInfo(announce, baseFile.getName(), files,
-			    lengthsList, piece_size, piece_hashes, total);
+    /**
+     * Creates a storage from the existing file or directory together with an
+     * appropriate MetaInfo file as can be announced on the given announce
+     * String location.
+     */
+    public Storage(File baseFile, String announce, StorageListener listener)
+            throws IOException
+    {
+        this.listener = listener;
 
-  }
+        // Create names, rafs and lengths arrays.
+        getFiles(baseFile);
 
-  // Creates piece hases for a new storage.
-  public void create() throws IOException
-  {
-    // Calculate piece_hashes
-    MessageDigest digest = null;
-    try
-      {
-	digest = MessageDigest.getInstance("SHA");
-      }
-    catch(NoSuchAlgorithmException nsa)
-      {
-	throw new InternalError(nsa.toString());
-      }
+        long total = 0;
+        ArrayList<Long> lengthsList = new ArrayList<Long>();
+        for (long length : lengths) {
+            total += length;
+            lengthsList.add(length);
+        }
 
-    byte[] piece_hashes = metainfo.getPieceHashes();
+        piece_size = MIN_PIECE_SIZE;
+        pieces = (int)((total - 1) / piece_size) + 1;
+        while (pieces > MAX_PIECES) {
+            piece_size = piece_size * 2;
+            pieces = (int)((total - 1) / piece_size) + 1;
+        }
 
-    byte[] piece = new byte[piece_size];
-    for (int i = 0; i < pieces; i++)
-      {
-	int length = getUncheckedPiece(i, piece, 0);
-	digest.update(piece, 0, length);
-	byte[] hash = digest.digest();
-	for (int j = 0; j < 20; j++)
-	  piece_hashes[20 * i + j] = hash[j];
+        // Note that piece_hashes and the bitfield will be filled after
+        // the MetaInfo is created.
+        byte[] piece_hashes = new byte[20 * pieces];
+        bitfield = new BitField(pieces);
+        needed = 0;
 
-	bitfield.set(i);
+        List<List<String>> files = new ArrayList<List<String>>();
+        for (String element : names) {
+            List<String> file = new ArrayList<String>();
+            StringTokenizer st = new StringTokenizer(element, File.separator);
+            while (st.hasMoreTokens()) {
+                String part = st.nextToken();
+                file.add(part);
+            }
+            files.add(file);
+        }
 
-	if (listener != null)
-	  listener.storageChecked(this, i, true);
-      }
+        if (files.size() == 1) {
+            files = null;
+            lengthsList = null;
+        }
 
-    if (listener != null)
-      listener.storageAllChecked(this);
+        // Note that the piece_hashes are not correctly setup yet.
+        metainfo = new MetaInfo(announce, baseFile.getName(), files,
+                lengthsList, piece_size, piece_hashes, total);
 
-    // Reannounce to force recalculating the info_hash.
-    metainfo = metainfo.reannounce(metainfo.getAnnounce());
-  }
+    }
 
-  private void getFiles(File base) throws IOException
-  {
-    ArrayList files = new ArrayList();
-    addFiles(files, base);
+    // Creates piece hases for a new storage.
+    public void create() throws IOException
+    {
+        // Calculate piece_hashes
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance("SHA");
+        } catch (NoSuchAlgorithmException nsa) {
+            throw new InternalError(nsa.toString());
+        }
 
-    int size = files.size();
-    names = new String[size];
-    lengths = new long[size];
-    rafs = new RandomAccessFile[size];
+        byte[] piece_hashes = metainfo.getPieceHashes();
 
-    int i = 0;
-    Iterator it = files.iterator();
-    while (it.hasNext())
-      {
-	File f = (File)it.next();
-	names[i] = f.getPath();
-	lengths[i] = f.length();
-	rafs[i] = new RandomAccessFile(f, "r");
-	i++;
-      }
-  }
+        byte[] piece = new byte[piece_size];
+        for (int i = 0; i < pieces; i++) {
+            int length = getUncheckedPiece(i, piece, 0);
+            digest.update(piece, 0, length);
+            byte[] hash = digest.digest();
+            for (int j = 0; j < 20; j++) {
+                piece_hashes[20 * i + j] = hash[j];
+            }
 
-  private static void addFiles(List l, File f)
-  {
-    if (!f.isDirectory())
-      l.add(f);
-    else
-      {
-	File[] files = f.listFiles();
-	if (files == null)
-	  {
-	    Snark.debug("WARNING: Skipping '" + f 
-			+ "' not a normal file.", Snark.WARNING);
-	    return;
-	  }
-	for (int i = 0; i < files.length; i++)
-	  addFiles(l, files[i]);
-      }
-  }
+            bitfield.set(i);
 
-  /**
-   * Returns the MetaInfo associated with this Storage.
-   */
-  public MetaInfo getMetaInfo()
-  {
-    return metainfo;
-  }
+            if (listener != null) {
+                listener.storageChecked(this, i, true);
+            }
+        }
 
-  /**
-   * How many pieces are still missing from this storage.
-   */
-  public int needed()
-  {
-    return needed;
-  }
+        if (listener != null) {
+            listener.storageAllChecked(this);
+        }
 
-  /**
-   * Whether or not this storage contains all pieces if the MetaInfo.
-   */
-  public boolean complete()
-  {
-    return needed == 0;
-  }
+        // Reannounce to force recalculating the info_hash.
+        metainfo = metainfo.reannounce(metainfo.getAnnounce());
+    }
 
-  /**
-   * The BitField that tells which pieces this storage contains.
-   * Do not change this since this is the current state of the storage.
-   */
-  public BitField getBitField()
-  {
-    return bitfield;
-  }
+    private void getFiles(File base) throws IOException
+    {
+        ArrayList<File> files = new ArrayList<File>();
+        addFiles(files, base);
 
-  /**
-   * Creates (and/or checks) all files from the metainfo file list.
-   */
-  public void check() throws IOException
-  {
-    File base = new File(filterName(metainfo.getName()));
+        int size = files.size();
+        names = new String[size];
+        lengths = new long[size];
+        rafs = new RandomAccessFile[size];
 
-    List files = metainfo.getFiles();
-    if (files == null)
-      {
-	// Create base as file.
-	Snark.debug("Creating/Checking file: " + base, Snark.NOTICE);
-	if (!base.createNewFile() && !base.exists())
-	  throw new IOException("Could not create file " + base);
+        int i = 0;
+        Iterator it = files.iterator();
+        while (it.hasNext()) {
+            File f = (File)it.next();
+            names[i] = f.getPath();
+            lengths[i] = f.length();
+            rafs[i] = new RandomAccessFile(f, "r");
+            i++;
+        }
+    }
 
-	lengths = new long[1];
-	rafs = new RandomAccessFile[1];
-	names = new String[1];
-	lengths[0] = metainfo.getTotalLength();
-	rafs[0] = new RandomAccessFile(base, "rw");
-	names[0] = base.getName();
-      }
-    else
-      {
-	// Create base as dir.
-	Snark.debug("Creating/Checking directory: " + base, Snark.NOTICE);
-	if (!base.mkdir() && !base.isDirectory())
-	  throw new IOException("Could not create directory " + base);
+    private static void addFiles(List<File> l, File f)
+    {
+        if (!f.isDirectory()) {
+            l.add(f);
+        } else {
+            File[] files = f.listFiles();
+            if (files == null) {
+                Snark.debug("WARNING: Skipping '" + f + "' not a normal file.",
+                        Snark.WARNING);
+                return;
+            }
+            for (File element : files) {
+                addFiles(l, element);
+            }
+        }
+    }
 
-	List  ls = metainfo.getLengths();
-	int size = files.size();
-	long total = 0;
-	lengths = new long[size];
-	rafs = new RandomAccessFile[size];
-	names = new String[size];
-	for (int i = 0; i < size; i++)
-	  {
-	    File f = createFileFromNames(base, (List)files.get(i));
-	    lengths[i] = ((Long)ls.get(i)).longValue();
-	    total += lengths[i];
-	    rafs[i] = new RandomAccessFile(f, "rw");
-	    names[i] = f.getName();
-	  }
+    /**
+     * Returns the MetaInfo associated with this Storage.
+     */
+    public MetaInfo getMetaInfo()
+    {
+        return metainfo;
+    }
 
-	// Sanity check for metainfo file.
-	long metalength = metainfo.getTotalLength();
-	if (total != metalength)
-	  throw new IOException("File lengths do not add up "
-				+ total + " != " + metalength);
-      }
-    checkCreateFiles();
-  }
+    /**
+     * How many pieces are still missing from this storage.
+     */
+    public int needed()
+    {
+        return needed;
+    }
 
-  /**
-   * Removes 'suspicious' characters from the give file name.
-   */
-  private String filterName(String name)
-  {
-    // XXX - Is this enough?
-    return name.replace(File.separatorChar, '_');
-  }
+    /**
+     * Whether or not this storage contains all pieces if the MetaInfo.
+     */
+    public boolean complete()
+    {
+        return needed == 0;
+    }
 
-  private File createFileFromNames(File base, List names) throws IOException
-  {
-    File f = null;
-    Iterator it = names.iterator();
-    while (it.hasNext())
-      {
-	String name = filterName((String)it.next());
-	if (it.hasNext())
-	  {
-	    // Another dir in the hierarchy.
-	    f = new File(base, name);
-	    if (!f.mkdir() && !f.isDirectory())
-	      throw new IOException("Could not create directory " + f);
-	    base = f;
-	  }
-	else
-	  {
-	    // The final element (file) in the hierarchy.
-	    f = new File(base, name);
-	    if (!f.createNewFile() && !f.exists())
-	      throw new IOException("Could not create file " + f);
-	  }
-      }
-    return f;
-  }
+    /**
+     * The BitField that tells which pieces this storage contains. Do not change
+     * this since this is the current state of the storage.
+     */
+    public BitField getBitField()
+    {
+        return bitfield;
+    }
 
-  private void checkCreateFiles() throws IOException
-  {
-    // Whether we are resuming or not,
-    // if any of the files already exists we assume we are resuming.
-    boolean resume = false;
+    /**
+     * Creates (and/or checks) all files from the metainfo file list.
+     */
+    public void check() throws IOException
+    {
+        File base = new File(filterName(metainfo.getName()));
 
-    // Make sure all files are available and of correct length
-    for (int i = 0; i < rafs.length; i++)
-      {
-	long length = rafs[i].length();
-	if(length == lengths[i])
-	  {
-	    if (listener != null)
-	      listener.storageAllocated(this, length);
-	    resume = true; // XXX Could dynamicly check
-	  }
-	else if (length == 0)
-	  allocateFile(i);
-	else
-	  throw new IOException("File '" + names[i]
-				+ "' exists, but has wrong length");
-      }
+        List files = metainfo.getFiles();
+        if (files == null) {
+            // Create base as file.
+            Snark.debug("Creating/Checking file: " + base, Snark.NOTICE);
+            if (!base.createNewFile() && !base.exists()) {
+                throw new IOException("Could not create file " + base);
+            }
 
-    // Check which pieces match and which don't
-    if (resume)
-      {
-	pieces = metainfo.getPieces();
-	byte[] piece = new byte[metainfo.getPieceLength(0)];
-	for (int i = 0; i < pieces; i++)
-	  {
-	    int length = getUncheckedPiece(i, piece, 0);
-	    boolean correctHash = metainfo.checkPiece(i, piece, 0, length);
-	    if (correctHash)
-	      {
-		bitfield.set(i);
-		needed--;
-	      }
+            lengths = new long[1];
+            rafs = new RandomAccessFile[1];
+            names = new String[1];
+            lengths[0] = metainfo.getTotalLength();
+            rafs[0] = new RandomAccessFile(base, "rw");
+            names[0] = base.getName();
+        } else {
+            // Create base as dir.
+            Snark.debug("Creating/Checking directory: " + base, Snark.NOTICE);
+            if (!base.mkdir() && !base.isDirectory()) {
+                throw new IOException("Could not create directory " + base);
+            }
 
-	    if (listener != null)
-	      listener.storageChecked(this, i, correctHash);
-	  }
-      }
+            List ls = metainfo.getLengths();
+            int size = files.size();
+            long total = 0;
+            lengths = new long[size];
+            rafs = new RandomAccessFile[size];
+            names = new String[size];
+            for (int i = 0; i < size; i++) {
+                File f = createFileFromNames(base, (List)files.get(i));
+                lengths[i] = ((Long)ls.get(i)).longValue();
+                total += lengths[i];
+                rafs[i] = new RandomAccessFile(f, "rw");
+                names[i] = f.getName();
+            }
 
-    if (listener != null)
-      listener.storageAllChecked(this);
-  }
+            // Sanity check for metainfo file.
+            long metalength = metainfo.getTotalLength();
+            if (total != metalength) {
+                throw new IOException("File lengths do not add up " + total
+                        + " != " + metalength);
+            }
+        }
+        checkCreateFiles();
+    }
 
-  private void allocateFile(int nr) throws IOException
-  {
-    // XXX - Is this the best way to make sure we have enough space for
-    // the whole file?
-    listener.storageCreateFile(this, names[nr], lengths[nr]);
-    final int ZEROBLOCKSIZE = metainfo.getPieceLength(0);
-    byte[] zeros = new byte[ZEROBLOCKSIZE];
-    int i;
-    for (i = 0; i < lengths[nr]/ZEROBLOCKSIZE; i++)
-      {
-	rafs[nr].write(zeros);
-	if (listener != null)
-	  listener.storageAllocated(this, ZEROBLOCKSIZE);
-      }
-    int size = (int)(lengths[nr] - i*ZEROBLOCKSIZE);
-    rafs[nr].write(zeros, 0, size);
-    if (listener != null)
-      listener.storageAllocated(this, size);
-  }
+    /**
+     * Removes 'suspicious' characters from the give file name.
+     */
+    private String filterName(String name)
+    {
+        // XXX - Is this enough?
+        return name.replace(File.separatorChar, '_');
+    }
 
+    private File createFileFromNames(File base, List names) throws IOException
+    {
+        File f = null;
+        Iterator it = names.iterator();
+        while (it.hasNext()) {
+            String name = filterName((String)it.next());
+            if (it.hasNext()) {
+                // Another dir in the hierarchy.
+                f = new File(base, name);
+                if (!f.mkdir() && !f.isDirectory()) {
+                    throw new IOException("Could not create directory " + f);
+                }
+                base = f;
+            } else {
+                // The final element (file) in the hierarchy.
+                f = new File(base, name);
+                if (!f.createNewFile() && !f.exists()) {
+                    throw new IOException("Could not create file " + f);
+                }
+            }
+        }
+        return f;
+    }
 
-  /**
-   * Closes the Storage and makes sure that all RandomAccessFiles are
-   * closed. The Storage is unusable after this.
-   */
-  public void close() throws IOException
-  {
-    for (int i = 0; i < rafs.length; i++)
-      {
-	synchronized(rafs[i])
-	  {
-	    rafs[i].close();
-	  }
-      }
-  }
+    private void checkCreateFiles() throws IOException
+    {
+        // Whether we are resuming or not,
+        // if any of the files already exists we assume we are resuming.
+        boolean resume = false;
 
-  /**
-   * Returns a byte array containing the requested piece or null if
-   * the storage doesn't contain the piece yet.
-   */
-  public byte[] getPiece(int piece) throws IOException
-  {
-    if (!bitfield.get(piece))
-      return null;
+        // Make sure all files are available and of correct length
+        for (int i = 0; i < rafs.length; i++) {
+            long length = rafs[i].length();
+            if (length == lengths[i]) {
+                if (listener != null) {
+                    listener.storageAllocated(this, length);
+                }
+                resume = true; // XXX Could dynamicly check
+            } else if (length == 0) {
+                allocateFile(i);
+            } else {
+                throw new IOException("File '" + names[i]
+                        + "' exists, but has wrong length");
+            }
+        }
 
-    byte[] bs = new byte[metainfo.getPieceLength(piece)];
-    getUncheckedPiece(piece, bs, 0);
-    return bs;
-  }
+        // Check which pieces match and which don't
+        if (resume) {
+            pieces = metainfo.getPieces();
+            byte[] piece = new byte[metainfo.getPieceLength(0)];
+            for (int i = 0; i < pieces; i++) {
+                int length = getUncheckedPiece(i, piece, 0);
+                boolean correctHash = metainfo.checkPiece(i, piece, 0, length);
+                if (correctHash) {
+                    bitfield.set(i);
+                    needed--;
+                }
 
-  /**
-   * Put the piece in the Storage if it is correct.
-   *
-   * @return true if the piece was correct (sha metainfo hash
-   * matches), otherwise false.
-   * @exception IOException when some storage related error occurs.
-   */
-  public boolean putPiece(int piece, byte[] bs) throws IOException
-  {
-    // First check if the piece is correct.
-    // If we were paranoia we could copy the array first.
-    int length = bs.length;
-    boolean correctHash = metainfo.checkPiece(piece, bs, 0, length);
-    if (listener != null)
-      listener.storageChecked(this, piece, correctHash);
-    if (!correctHash)
-      return false;
+                if (listener != null) {
+                    listener.storageChecked(this, i, correctHash);
+                }
+            }
+        }
 
-    boolean complete;
-    synchronized(bitfield)
-      {
-	if (bitfield.get(piece))
-	  return true; // No need to store twice.
-	else
-	  {
-	    bitfield.set(piece);
-	    needed--;
-	    complete = needed == 0;
-	  }
-      }
+        if (listener != null) {
+            listener.storageAllChecked(this);
+        }
+    }
 
-    long start = piece * metainfo.getPieceLength(0);
-    int i = 0;
-    long raflen = lengths[i];
-    while (start > raflen)
-      {
-	i++;
-	start -= raflen;
-	raflen = lengths[i];
-      }
-    
-    int written = 0;
-    int off = 0;
-    while (written < length)
-      {
-	int need = length - written;
-	int len = (start + need < raflen) ? need : (int)(raflen - start);
-	synchronized(rafs[i])
-	  {
-	    rafs[i].seek(start);
-	    rafs[i].write(bs, off + written, len);
-	  }
-	written += len;
-	if (need - len > 0)
-	  {
-	    i++;
-	    raflen = lengths[i];
-	    start = 0;
-	  }
-      }
+    private void allocateFile(int nr) throws IOException
+    {
+        // XXX - Is this the best way to make sure we have enough space for
+        // the whole file?
+        listener.storageCreateFile(this, names[nr], lengths[nr]);
+        final int ZEROBLOCKSIZE = metainfo.getPieceLength(0);
+        byte[] zeros = new byte[ZEROBLOCKSIZE];
+        int i;
+        for (i = 0; i < lengths[nr] / ZEROBLOCKSIZE; i++) {
+            rafs[nr].write(zeros);
+            if (listener != null) {
+                listener.storageAllocated(this, ZEROBLOCKSIZE);
+            }
+        }
+        int size = (int)(lengths[nr] - i * ZEROBLOCKSIZE);
+        rafs[nr].write(zeros, 0, size);
+        if (listener != null) {
+            listener.storageAllocated(this, size);
+        }
+    }
 
-    return true;
-  }
+    /**
+     * Closes the Storage and makes sure that all RandomAccessFiles are closed.
+     * The Storage is unusable after this.
+     */
+    public void close() throws IOException
+    {
+        for (RandomAccessFile element : rafs) {
+            synchronized (element) {
+                element.close();
+            }
+        }
+    }
 
-  private int getUncheckedPiece(int piece, byte[] bs, int off)
-    throws IOException
-  {
-    // XXX - copy/paste code from putPiece().
-    long start = piece * metainfo.getPieceLength(0);
-    int length = metainfo.getPieceLength(piece);
-    int i = 0;
-    long raflen = lengths[i];
-    while (start > raflen)
-      {
-	i++;
-	start -= raflen;
-	raflen = lengths[i];
-      }
+    /**
+     * Returns a byte array containing the requested piece or null if the
+     * storage doesn't contain the piece yet.
+     */
+    public byte[] getPiece(int piece) throws IOException
+    {
+        if (!bitfield.get(piece)) {
+            return null;
+        }
 
-    int read = 0;
-    while (read < length)
-      {
-	int need = length - read;
-	int len = (start + need < raflen) ? need : (int)(raflen - start);
-	synchronized(rafs[i])
-	  {
-	    rafs[i].seek(start);
-	    rafs[i].readFully(bs, off + read, len);
-	  }
-	read += len;
-	if (need - len > 0)
-	  {
-	    i++;
-	    raflen = lengths[i];
-	    start = 0;
-	  }
-      }
+        byte[] bs = new byte[metainfo.getPieceLength(piece)];
+        getUncheckedPiece(piece, bs, 0);
+        return bs;
+    }
 
-    return length;
-  }
+    /**
+     * Put the piece in the Storage if it is correct.
+     * 
+     * @return true if the piece was correct (sha metainfo hash matches),
+     *         otherwise false.
+     * @exception IOException
+     *                when some storage related error occurs.
+     */
+    public boolean putPiece(int piece, byte[] bs) throws IOException
+    {
+        // First check if the piece is correct.
+        // If we were paranoia we could copy the array first.
+        int length = bs.length;
+        boolean correctHash = metainfo.checkPiece(piece, bs, 0, length);
+        if (listener != null) {
+            listener.storageChecked(this, piece, correctHash);
+        }
+        if (!correctHash) {
+            return false;
+        }
+
+        synchronized (bitfield) {
+            if (bitfield.get(piece)) {
+                return true; // No need to store twice.
+            } else {
+                bitfield.set(piece);
+                needed--;
+            }
+        }
+
+        long start = piece * metainfo.getPieceLength(0);
+        int i = 0;
+        long raflen = lengths[i];
+        while (start > raflen) {
+            i++;
+            start -= raflen;
+            raflen = lengths[i];
+        }
+
+        int written = 0;
+        int off = 0;
+        while (written < length) {
+            int need = length - written;
+            int len = (start + need < raflen) ? need : (int)(raflen - start);
+            synchronized (rafs[i]) {
+                rafs[i].seek(start);
+                rafs[i].write(bs, off + written, len);
+            }
+            written += len;
+            if (need - len > 0) {
+                i++;
+                raflen = lengths[i];
+                start = 0;
+            }
+        }
+
+        return true;
+    }
+
+    private int getUncheckedPiece(int piece, byte[] bs, int off)
+            throws IOException
+    {
+        // XXX - copy/paste code from putPiece().
+        long start = piece * metainfo.getPieceLength(0);
+        int length = metainfo.getPieceLength(piece);
+        int i = 0;
+        long raflen = lengths[i];
+        while (start > raflen) {
+            i++;
+            start -= raflen;
+            raflen = lengths[i];
+        }
+
+        int read = 0;
+        while (read < length) {
+            int need = length - read;
+            int len = (start + need < raflen) ? need : (int)(raflen - start);
+            synchronized (rafs[i]) {
+                rafs[i].seek(start);
+                rafs[i].readFully(bs, off + read, len);
+            }
+            read += len;
+            if (need - len > 0) {
+                i++;
+                raflen = lengths[i];
+                start = 0;
+            }
+        }
+
+        return length;
+    }
 }

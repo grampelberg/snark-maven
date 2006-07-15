@@ -6,7 +6,7 @@ GCJ_FLAGS=-g -O2
 #JAVAC=$(GCJ) -C
 #JAVAC_FLAGS=$(GCJ_FLAGS)
 JAVAC=jikes-classpath
-JAVAC_FLAGS=-g -O
+JAVAC_FLAGS=-g -O -source 1.5
 
 JAR=fastjar
 
