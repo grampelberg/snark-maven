@@ -31,6 +31,8 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class HttpAcceptor
 {
@@ -91,15 +93,11 @@ public class HttpAcceptor
                 new InputStreamReader(bis, ASCII));
 
         String resource = readRequest(br);
-        if (Snark.debug >= Snark.INFO) {
-            Snark.debug("HTTP request for: " + resource, Snark.INFO);
-        }
+        log.log(Level.FINE, "HTTP request for: " + resource);
+
         if (resource != null) {
             Map headers = readHeaders(br);
-            if (Snark.debug >= Snark.DEBUG) {
-                Snark.debug(headers.toString(), Snark.DEBUG);
-                Snark.debug("", Snark.DEBUG);
-            }
+            log.log(Level.FINER, headers.toString());
 
             if (resource.equals("/")) {
                 sendData(bos, SNARKPAGE, "text/html");
@@ -178,11 +176,8 @@ public class HttpAcceptor
     private static void sendData(OutputStream out, int responseCode,
             String reason, byte[] data, String content_type) throws IOException
     {
-        if (Snark.debug >= Snark.DEBUG) {
-            Snark.debug("HTTP/1.0 " + responseCode + " " + reason + " "
-                    + content_type + " (" + data.length + " bytes)",
-                    Snark.DEBUG);
-        }
+        log.log(Level.FINER, "HTTP/1.0 " + responseCode + " " + reason + " " +
+                    content_type + " (" + data.length + " bytes)");
         byte[] type = content_type.getBytes(ASCII);
 
         // Status line
@@ -239,4 +234,8 @@ public class HttpAcceptor
         }
         return m;
     }
+
+    /** The Java logger used to process our log events. */
+    protected static final Logger log =
+        Logger.getLogger("org.klomp.snark.server");
 }

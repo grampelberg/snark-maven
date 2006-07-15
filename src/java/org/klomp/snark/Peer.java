@@ -27,6 +27,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Peer implements Comparable<Peer>
 {
@@ -184,7 +186,7 @@ public class Peer implements Comparable<Peer>
             // Ignore, probably just the other side closing the connection.
             // Or refusing the connection, timing out, etc.
         } catch (Throwable t) {
-            Snark.debug(this + ": " + t, Snark.ERROR);
+            log.log(Level.SEVERE, "Peer connection failed " + toString(), t);
             t.printStackTrace();
         } finally {
             if (deregister) {
@@ -386,4 +388,8 @@ public class Peer implements Comparable<Peer>
             s.uploaded = 0;
         }
     }
+
+    /** The Java logger used to process our log events. */
+    protected static final Logger log =
+        Logger.getLogger("org.klomp.snark.peer");
 }

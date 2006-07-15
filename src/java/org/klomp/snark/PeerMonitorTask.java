@@ -27,9 +27,9 @@ import java.util.TimerTask;
  * TimerTask that monitors the peers and total up/download speeds. Works
  * together with the main Snark class to report periodical statistics.
  */
-class PeerMonitorTask extends TimerTask
+public class PeerMonitorTask extends TimerTask
 {
-    static final long MONITOR_PERIOD = 10 * 1000; // Ten seconds.
+    public static final long MONITOR_PERIOD = 10 * 1000; // Ten seconds.
 
     private static final long KILOPERSECOND = 1024 * (MONITOR_PERIOD / 1000);
 
@@ -39,7 +39,7 @@ class PeerMonitorTask extends TimerTask
 
     private long lastUploaded = 0;
 
-    PeerMonitorTask(PeerCoordinator coordinator)
+    public PeerMonitorTask(PeerCoordinator coordinator)
     {
         this.coordinator = coordinator;
     }

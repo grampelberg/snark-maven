@@ -23,6 +23,8 @@ package org.klomp.snark;
 import java.security.Provider;
 import java.security.Security;
 
+import org.klomp.snark.cmd.SnarkApplication;
+
 /**
  * Main snark startup class for staticly linking with gcj.
  * It references somee necessary classes that are normally loaded through
@@ -46,6 +48,6 @@ public class StaticSnark
         }
 
         // And finally call the normal starting point.
-        Snark.main(args);
+        SnarkApplication.main(args);
     }
 }

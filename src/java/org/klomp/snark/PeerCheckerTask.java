@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * TimerTask that checks for good/bad up/downloader. Works together with the
@@ -103,14 +105,13 @@ class PeerCheckerTask extends TimerTask
                 downloaded += download;
                 peer.resetCounters();
 
-                if (Snark.debug >= Snark.DEBUG) {
-                    Snark.debug(peer + ":", Snark.DEBUG);
-                    Snark.debug(" ul: " + upload / KILOPERSECOND + " dl: "
-                            + download / KILOPERSECOND + " i: "
-                            + peer.isInterested() + " I: "
-                            + peer.isInteresting() + " c: " + peer.isChoking()
-                            + " C: " + peer.isChoked(), Snark.DEBUG);
-                }
+                log.log(Level.FINEST, peer + ":" +
+                    " ul: " + upload / KILOPERSECOND +
+                    " dl: " + download / KILOPERSECOND +
+                    " i: " + peer.isInterested() +
+                    " I: " + peer.isInteresting() +
+                    " c: " + peer.isChoking() +
+                    " C: " + peer.isChoked());
 
                 // If we are at our max uploaders and we have lots of other
                 // interested peers try to make some room.
@@ -120,10 +121,8 @@ class PeerCheckerTask extends TimerTask
                         && !peer.isChoking()) {
                     // Check if it still wants pieces from us.
                     if (!peer.isInterested()) {
-                        if (Snark.debug >= Snark.INFO) {
-                            Snark.debug("Choke uninterested peer: " + peer,
-                                    Snark.INFO);
-                        }
+                        log.log(Level.FINER, "Choke uninterested peer: " +
+                            peer);
                         peer.setChoking(true);
                         uploaders--;
                         coordinator.uploaders--;
@@ -133,10 +132,7 @@ class PeerCheckerTask extends TimerTask
                         removed.add(peer);
                     } else if (peer.isChoked()) {
                         // If they are choking us make someone else a downloader
-                        if (Snark.debug >= Snark.DEBUG) {
-                            Snark.debug("Choke choking peer: " + peer,
-                                    Snark.DEBUG);
-                        }
+                        log.log(Level.FINEST, "Choke choking peer: " + peer);
                         peer.setChoking(true);
                         uploaders--;
                         coordinator.uploaders--;
@@ -147,11 +143,8 @@ class PeerCheckerTask extends TimerTask
                     } else if (peer.isInteresting() && !peer.isChoked()
                             && download == 0) {
                         // We are downloading but didn't receive anything...
-                        if (Snark.debug >= Snark.DEBUG) {
-                            Snark.debug(
-                                    "Choke downloader that doesn't deliver:"
-                                            + peer, Snark.DEBUG);
-                        }
+                        log.log(Level.FINEST,
+                            "Choke downloader that doesn't deliver:" + peer);
                         peer.setChoking(true);
                         uploaders--;
                         coordinator.uploaders--;
@@ -175,10 +168,8 @@ class PeerCheckerTask extends TimerTask
             if (uploaders >= PeerCoordinator.MAX_UPLOADERS
                     && interested > PeerCoordinator.MAX_UPLOADERS
                     && worstDownloader != null) {
-                if (Snark.debug >= Snark.DEBUG) {
-                    Snark.debug("Choke worst downloader: " + worstDownloader,
-                            Snark.DEBUG);
-                }
+                log.log(Level.FINEST, "Choke worst downloader: " +
+                    worstDownloader);
 
                 worstDownloader.setChoking(true);
                 coordinator.uploaders--;
@@ -195,4 +186,7 @@ class PeerCheckerTask extends TimerTask
             coordinator.peers.addAll(removed);
         }
     }
+
+    protected static final Logger log =
+        Logger.getLogger("org.klomp.snark.peer");
 }

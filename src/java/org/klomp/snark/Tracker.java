@@ -30,6 +30,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.klomp.snark.bencode.BEncoder;
 
@@ -63,10 +65,8 @@ public class Tracker
 
     public byte[] handleRequest(InetAddress address, int port, Map params)
     {
-        if (Snark.debug >= Snark.INFO) {
-            Snark.debug("TrackerReq " + address + ":" + port + " -> " + params,
-                    Snark.INFO);
-        }
+        log.log(Level.FINE, "TrackerReq " + address + ":" + port +
+            " -> " + params);
 
         byte[] info_hash;
         String info_hash_value = (String)params.get("info_hash");
@@ -138,9 +138,7 @@ public class Tracker
             response.put("peers", peerList);
         }
 
-        if (Snark.debug >= Snark.INFO) {
-            Snark.debug("Tracker response: " + response, Snark.INFO);
-        }
+        log.log(Level.FINE, "Tracker response: " + response);
 
         return BEncoder.bencode(response);
     }
@@ -176,4 +174,7 @@ public class Tracker
         }
         return baos.toByteArray();
     }
+
+    protected static final Logger log =
+        Logger.getLogger("org.klomp.snark.Tracker");
 }

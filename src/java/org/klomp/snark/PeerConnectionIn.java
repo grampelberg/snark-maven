@@ -22,6 +22,8 @@ package org.klomp.snark;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class PeerConnectionIn implements Runnable
 {
@@ -138,10 +140,12 @@ class PeerConnectionIn implements Runnable
         } catch (IOException ioe) {
             // Ignore, probably the other side closed connection.
         } catch (Throwable t) {
-            Snark.debug(peer + ": " + t, Snark.ERROR);
-            t.printStackTrace();
+            log.log(Level.SEVERE, peer + " failed", t);
         } finally {
             peer.disconnect();
         }
     }
+
+    protected static final Logger log =
+        Logger.getLogger("org.klomp.snark.peer");
 }

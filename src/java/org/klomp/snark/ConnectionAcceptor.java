@@ -27,6 +27,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Accepts connections on a TCP port and routes them to sub-acceptors.
@@ -132,7 +134,7 @@ public class ConnectionAcceptor implements Runnable
                 };
                 t.start();
             } catch (IOException ioe) {
-                Snark.debug("Error while accepting: " + ioe, Snark.ERROR);
+                log.log(Level.SEVERE, "Error while accepting", ioe);
                 stop = true;
             }
         }
@@ -142,4 +144,8 @@ public class ConnectionAcceptor implements Runnable
         } catch (IOException ignored) {
         }
     }
+
+    /** The Java logger used to process our log events. */
+    protected static final Logger log =
+        Logger.getLogger("org.klomp.snark.server");
 }

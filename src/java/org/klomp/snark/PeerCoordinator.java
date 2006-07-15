@@ -27,6 +27,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Coordinates what peer does what.
@@ -172,15 +174,11 @@ public class PeerCoordinator implements PeerListener
 
         synchronized (peers) {
             if (peerIDInList(peer.getPeerID(), peers)) {
-                if (Snark.debug >= Snark.INFO) {
-                    Snark.debug("Already connected to: " + peer, Snark.INFO);
-                }
+                log.log(Level.FINER, "Already connected to: " + peer);
                 peer.disconnect(false); // Don't deregister this
                 // connection/peer.
             } else {
-                if (Snark.debug >= Snark.INFO) {
-                    Snark.debug("New connection to peer: " + peer, Snark.INFO);
-                }
+                log.log(Level.FINER, "New connection to peer: " + peer);
 
                 // Add it to the beginning of the list.
                 // And try to optimistically make it a uploader.
@@ -229,12 +227,12 @@ public class PeerCoordinator implements PeerListener
             };
             String threadName = peer.toString();
             new Thread(r, threadName).start();
-        } else if (Snark.debug >= Snark.INFO) {
+        } else if (log.getLevel().intValue() <= Level.FINER.intValue()) {
             if (peer.isConnected()) {
-                Snark.debug("Add peer already connected: " + peer, Snark.INFO);
+                log.log(Level.FINER, "Add peer already connected: " + peer);
             } else {
-                Snark.debug("MAX_CONNECTIONS = " + MAX_CONNECTIONS
-                        + " not accepting extra peer: " + peer, Snark.INFO);
+                log.log(Level.FINER, "MAX_CONNECTIONS = " + MAX_CONNECTIONS +
+                    " not accepting extra peer: " + peer);
             }
         }
     }
@@ -261,9 +259,7 @@ public class PeerCoordinator implements PeerListener
 
         while (uploaders < MAX_UPLOADERS && interested.size() > 0) {
             Peer peer = interested.remove(0);
-            if (Snark.debug >= Snark.INFO) {
-                Snark.debug("Unchoke: " + peer, Snark.INFO);
-            }
+            log.log(Level.FINER, "Unchoke: " + peer);
             peer.setChoking(false);
             uploaders++;
             // Put peer back at the end of the list.
@@ -403,10 +399,8 @@ public class PeerCoordinator implements PeerListener
         synchronized (wantedPieces) {
             Integer p = new Integer(piece);
             if (!wantedPieces.contains(p)) {
-                if (Snark.debug >= Snark.INFO) {
-                    Snark.debug(peer + " piece " + piece + " no longer needed",
-                            Snark.INFO);
-                }
+                log.log(Level.FINER, peer + " piece " + piece +
+                    " no longer needed");
 
                 // No need to announce have piece to peers.
                 // Assume we got a good piece, we don't really care anymore.
@@ -415,16 +409,12 @@ public class PeerCoordinator implements PeerListener
 
             try {
                 if (storage.putPiece(piece, bs)) {
-                    if (Snark.debug >= Snark.INFO) {
-                        Snark.debug("Recv p" + piece + " " + peer, Snark.INFO);
-                    }
+                    log.log(Level.FINER, "Recv p" + piece + " " + peer);
                 } else {
                     // Oops. We didn't actually download this then... :(
                     downloaded -= metainfo.getPieceLength(piece);
-                    if (Snark.debug >= Snark.NOTICE) {
-                        Snark.debug("Got BAD piece " + piece + " from " + peer,
-                                Snark.NOTICE);
-                    }
+                    log.log(Level.INFO, "Got BAD piece " + piece + " from " +
+                        peer);
                     return false; // No need to announce BAD piece to peers.
                 }
             } catch (IOException ioe) {
@@ -449,9 +439,7 @@ public class PeerCoordinator implements PeerListener
 
     public void gotChoke(Peer peer, boolean choke)
     {
-        if (Snark.debug >= Snark.INFO) {
-            Snark.debug("Got choke(" + choke + "): " + peer, Snark.INFO);
-        }
+        log.log(Level.FINER, "Got choke(" + choke + "): " + peer);
 
         if (listener != null) {
             listener.peerChange(this, peer);
@@ -466,9 +454,7 @@ public class PeerCoordinator implements PeerListener
                     if (peer.isChoking()) {
                         uploaders++;
                         peer.setChoking(false);
-                        if (Snark.debug >= Snark.INFO) {
-                            Snark.debug("Unchoke: " + peer, Snark.INFO);
-                        }
+                        log.log(Level.FINER, "Unchoke: " + peer);
                     }
                 }
             }
@@ -481,9 +467,7 @@ public class PeerCoordinator implements PeerListener
 
     public void disconnected(Peer peer)
     {
-        if (Snark.debug >= Snark.INFO) {
-            Snark.debug("Disconnected " + peer, Snark.INFO);
-        }
+        log.log(Level.FINER, "Disconnected " + peer);
 
         synchronized (peers) {
             // Make sure it is no longer in our lists
@@ -497,4 +481,7 @@ public class PeerCoordinator implements PeerListener
             listener.peerChange(this, peer);
         }
     }
+
+    protected static final Logger log =
+        Logger.getLogger("org.klomp.snark.peer");
 }

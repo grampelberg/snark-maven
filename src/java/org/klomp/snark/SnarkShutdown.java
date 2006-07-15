@@ -21,6 +21,8 @@
 package org.klomp.snark;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Makes sure everything ends correctly when shutting down.
@@ -51,24 +53,24 @@ public class SnarkShutdown extends Thread
     @Override
     public void run()
     {
-        Snark.debug("Shutting down...", Snark.NOTICE);
+        log.log(Level.INFO, "Shutting down...");
 
-        Snark.debug("Halting ConnectionAcceptor...", Snark.INFO);
+        log.log(Level.FINE, "Halting ConnectionAcceptor...");
         if (acceptor != null) {
             acceptor.halt();
         }
 
-        Snark.debug("Halting TrackerClient...", Snark.INFO);
+        log.log(Level.FINE, "Halting TrackerClient...");
         if (trackerclient != null) {
             trackerclient.halt();
         }
 
-        Snark.debug("Halting PeerCoordinator...", Snark.INFO);
+        log.log(Level.FINE, "Halting PeerCoordinator...");
         if (coordinator != null) {
             coordinator.halt();
         }
 
-        Snark.debug("Closing Storage...", Snark.INFO);
+        log.log(Level.FINE, "Closing Storage...");
         if (storage != null) {
             try {
                 storage.close();
@@ -79,11 +81,15 @@ public class SnarkShutdown extends Thread
 
         // XXX - Should actually wait till done...
         try {
-            Snark.debug("Waiting 5 seconds...", Snark.INFO);
+            log.log(Level.FINE, "Waiting 5 seconds...");
             Thread.sleep(5 * 1000);
         } catch (InterruptedException ie) { /* ignored */
         }
 
         listener.shutdown();
     }
+
+    /** The Java logger used to process our log events. */
+    protected static final Logger log =
+        Logger.getLogger("org.klomp.snark.server");
 }

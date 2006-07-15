@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class PeerConnectionOut implements Runnable
 {
@@ -104,9 +106,7 @@ class PeerConnectionOut implements Runnable
                     }
                 }
                 if (m != null) {
-                    if (Snark.debug >= Snark.ALL) {
-                        Snark.debug("Send " + peer + ": " + m, Snark.ALL);
-                    }
+                    log.log(Level.ALL, "Send " + peer + ": " + m);
                     m.sendMessage(dout);
 
                     // Remove all piece messages after sending a choke message.
@@ -125,8 +125,7 @@ class PeerConnectionOut implements Runnable
         } catch (IOException ioe) {
             // Ignore, probably other side closed connection.
         } catch (Throwable t) {
-            Snark.debug(peer + ": " + t, Snark.ERROR);
-            t.printStackTrace();
+            log.log(Level.SEVERE, peer + " failed", t);
         } finally {
             quit = true;
             peer.disconnect();
@@ -315,4 +314,7 @@ class PeerConnectionOut implements Runnable
             }
         }
     }
+
+    protected static final Logger log =
+        Logger.getLogger("org.klomp.snark.peer");
 }

@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Maintains pieces on disk. Can be used to store and retrieve pieces.
@@ -196,8 +198,8 @@ public class Storage
         } else {
             File[] files = f.listFiles();
             if (files == null) {
-                Snark.debug("WARNING: Skipping '" + f + "' not a normal file.",
-                        Snark.WARNING);
+                log.log(Level.WARNING,
+                    "Skipping '" + f + "' not a normal file.");
                 return;
             }
             for (File element : files) {
@@ -249,7 +251,7 @@ public class Storage
         List files = metainfo.getFiles();
         if (files == null) {
             // Create base as file.
-            Snark.debug("Creating/Checking file: " + base, Snark.NOTICE);
+            log.log(Level.INFO, "Creating/Checking file: " + base);
             if (!base.createNewFile() && !base.exists()) {
                 throw new IOException("Could not create file " + base);
             }
@@ -262,7 +264,7 @@ public class Storage
             names[0] = base.getName();
         } else {
             // Create base as dir.
-            Snark.debug("Creating/Checking directory: " + base, Snark.NOTICE);
+            log.log(Level.INFO, "Creating/Checking directory: " + base);
             if (!base.mkdir() && !base.isDirectory()) {
                 throw new IOException("Could not create directory " + base);
             }
@@ -509,4 +511,8 @@ public class Storage
 
         return length;
     }
+
+    /** The Java logger used to process our log events. */
+    protected static final Logger log =
+        Logger.getLogger("org.klomp.snark.Storage");
 }

@@ -26,6 +26,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Informs metainfo tracker of events and gets new peers for peer coordinator.
@@ -107,13 +109,12 @@ public class TrackerClient extends Thread
                     started = true;
                 } catch (IOException ioe) {
                     // Probably not fatal (if it doesn't last to long...)
-                    Snark.debug("WARNING: Could not contact tracker at '"
-                            + announce + "': " + ioe, Snark.WARNING);
+                    log.log(Level.WARNING, "Could not contact tracker at '" +
+                        announce, ioe);
                 }
 
                 if (!started && !stop) {
-                    Snark.debug("         Retrying in one minute...",
-                            Snark.DEBUG);
+                    log.log(Level.FINER, "         Retrying in one minute...");
                     try {
                         // Sleep one minutes...
                         Thread.sleep(60 * 1000);
@@ -163,14 +164,13 @@ public class TrackerClient extends Thread
                         }
                     } catch (IOException ioe) {
                         // Probably not fatal (if it doesn't last to long...)
-                        Snark.debug("WARNING: Could not contact tracker at '"
-                                + announce + "': " + ioe, Snark.WARNING);
+                        log.log(Level.WARNING,
+                            "Could not contact tracker at '" + announce, ioe);
                     }
                 }
             }
         } catch (Throwable t) {
-            Snark.debug("TrackerClient: " + t, Snark.ERROR);
-            t.printStackTrace();
+            log.log(Level.SEVERE, "Fatal exception in TrackerClient", t);
         } finally {
             try {
                 doRequest(announce, infoHash, peerID, uploaded, downloaded,
@@ -190,9 +190,7 @@ public class TrackerClient extends Thread
                 + downloaded + "&left=" + left
                 + ((event != NO_EVENT) ? ("&event=" + event) : "");
         URL u = new URL(s);
-        if (Snark.debug >= Snark.INFO) {
-            Snark.debug("Sending TrackerClient request: " + u, Snark.INFO);
-        }
+        log.log(Level.FINE, "Sending TrackerClient request: " + u);
 
         URLConnection c = u.openConnection();
         c.connect();
@@ -209,9 +207,7 @@ public class TrackerClient extends Thread
 
         TrackerInfo info = new TrackerInfo(in, coordinator.getID(), coordinator
                 .getMetaInfo());
-        if (Snark.debug >= Snark.INFO) {
-            Snark.debug("TrackerClient response: " + info, Snark.INFO);
-        }
+        log.log(Level.FINE, "TrackerClient response: " + info);
         lastRequestTime = System.currentTimeMillis();
 
         String failure = info.getFailureReason();
@@ -241,4 +237,7 @@ public class TrackerClient extends Thread
 
         return sb.toString();
     }
+
+    protected static final Logger log =
+        Logger.getLogger("org.klomp.snark.TrackerClient");
 }

@@ -50,6 +50,7 @@ import org.klomp.snark.SnarkShutdown;
 import org.klomp.snark.ShutdownListener;
 import org.klomp.snark.Storage;
 import org.klomp.snark.StorageListener;
+import org.klomp.snark.cmd.SnarkApplication;
 
 
 /**
@@ -303,7 +304,7 @@ public class SnarkGnome implements Runnable, StorageListener,
     // Creates the actual Snark object. Runs in the background
     public void run()
     {
-        _snark = Snark.parseArguments(args, this, this);
+        _snark = SnarkApplication.parseArguments(args, this, this);
 
         snarkhook = new SnarkShutdown(_snark.storage, _snark.coordinator,
                 _snark.acceptor, _snark.trackerclient, this);
