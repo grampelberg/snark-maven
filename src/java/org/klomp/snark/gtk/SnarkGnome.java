@@ -20,6 +20,9 @@
 
 package org.klomp.snark.gtk;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.gnu.glib.Fireable;
 import org.gnu.glib.Timer;
 import org.gnu.gnome.App;
@@ -231,19 +234,6 @@ public class SnarkGnome implements Runnable, StorageListener,
     private boolean shutdown_now = false;
 
     /**
-     * Handles Life Cycle events (main application window close or delete).
-     */
-    public void lifeCycleEvent (LifeCycleEvent event)
-    {
-        if (event.isOfType(LifeCycleEvent.Type.DELETE)
-            || event.isOfType(LifeCycleEvent.Type.DESTROY)) {
-            // XXX - Must be set so we don't crash in fire()
-            shutdown_now = true;
-            quit();
-        }
-    }
-
-    /**
      * Handles Menu events (quit, about, ...).
      */
     public void menuItemEvent (MenuItemEvent event)
@@ -256,8 +246,8 @@ public class SnarkGnome implements Runnable, StorageListener,
         } else if (source.equals(aboutItem)) {
             about();
         } else {
-            System.err.println("Unknow event: " + event + " from source: "
-                + source);
+            log.log(Level.WARNING, "Unknown event: " + event +
+                " from source: " + source);
         }
     }
 
@@ -563,11 +553,21 @@ public class SnarkGnome implements Runnable, StorageListener,
         return true;
     }
 
-    protected Snark _snark;
+    // documentation inherited from interface LifeCycleListener
+    public void lifeCycleEvent (LifeCycleEvent event)
+    {
+    }
 
+    // documentation inherited from interface LifeCycleListener
     public boolean lifeCycleQuery (LifeCycleEvent arg0)
     {
-        // TODO Auto-generated method stub
+        shutdown_now = true;
+        quit();
         return false;
     }
+
+    protected Snark _snark;
+
+    /** The Java logger used to process our log events. */
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.gtk");
 }

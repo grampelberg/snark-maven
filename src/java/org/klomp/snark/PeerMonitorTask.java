@@ -22,6 +22,8 @@ package org.klomp.snark;
 
 import java.util.Iterator;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * TimerTask that monitors the peers and total up/download speeds. Works
@@ -111,18 +113,18 @@ public class PeerMonitorTask extends TimerTask
         int totalP = coordinator.metainfo.getPieces();
         long totalMB = coordinator.metainfo.getTotalLength() / (1024 * 1024);
 
-        System.out.println();
-        System.out.println("Down: " + (downloaded - lastDownloaded)
+        log.log(Level.INFO, "Down: " + (downloaded - lastDownloaded)
             / KILOPERSECOND + "KB/s" + " (" + totalDown + ")" + " Up: "
             + (uploaded - lastUploaded) / KILOPERSECOND + "KB/s" + " ("
             + totalUp + ")" + " Need " + needP + " (" + needMB + "MB)" + " of "
             + totalP + " (" + totalMB + "MB)" + " pieces");
-        System.out.println(peers + ": Download #" + downloaders + " Upload #"
+        log.log(Level.INFO, peers + ": Download #" + downloaders + " Upload #"
             + uploaders + " Interested #" + interested + " Interesting #"
             + interesting + " Choking #" + choking + " Choked #" + choked);
-        System.out.println();
-
         lastDownloaded = downloaded;
         lastUploaded = uploaded;
     }
+
+    /** The Java logger used to process our log events. */
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.status");
 }

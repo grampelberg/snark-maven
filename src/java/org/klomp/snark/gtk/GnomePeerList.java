@@ -170,20 +170,6 @@ class GnomePeerList implements LifeCycleListener
         refresh();
     }
 
-    /**
-     * Handles Life Cycle events (Window close or delete).
-     */
-    public void lifeCycleEvent (LifeCycleEvent event)
-    {
-        if (event.isOfType(LifeCycleEvent.Type.DELETE)
-            || event.isOfType(LifeCycleEvent.Type.DESTROY)) {
-            list.clear();
-            window = null;
-            tree = null;
-            oldPeerList = null;
-        }
-    }
-
     // Update eevery 5 seconds
     private static final int UPDATE_SEC = 5;
 
@@ -282,9 +268,18 @@ class GnomePeerList implements LifeCycleListener
         }
     }
 
+    // documentation inherited from interface LifeCycleListener
+    public void lifeCycleEvent (LifeCycleEvent event)
+    {
+    }
+
+    // documentation inherited from interface LifeCycleListener
     public boolean lifeCycleQuery (LifeCycleEvent lifecycleevent)
     {
-        // TODO Auto-generated method stub
+        list.clear();
+        window = null;
+        tree = null;
+        oldPeerList = null;
         return false;
     }
 }

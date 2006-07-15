@@ -3,6 +3,7 @@ package org.klomp.snark.cmd;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -18,43 +19,32 @@ import org.klomp.snark.Snark;
 import org.klomp.snark.SnarkShutdown;
 import org.klomp.snark.StorageListener;
 
+/**
+ * A basic command line interface to the Snark library.
+ * 
+ * @author Elizabeth Fong (elizabeth@threerings.net)
+ */
 public class SnarkApplication
 {
-    protected static final String newline = System.getProperty("line.separator");
-
-    protected static final String copyright = "The Hunting of the Snark Project - "
-        + "Copyright (C) 2003 Mark J. Wielaard, (c) 2006 Three Rings Design"
-        + newline
-        + newline
-        + "Snark comes with ABSOLUTELY NO WARRANTY.  This is free software, and"
-        + newline
-        + "you are welcome to redistribute it under certain conditions; read the"
-        + newline + "COPYING file for details.";
-
-    protected static final String usage = "Press return for help. Type \"quit\" and return to stop.";
-
-    protected static final String help = "Commands: 'info', 'list', 'quit'.";
-
-    /**
-     * A basic command line interface to the Snark library.
-     */
     public static void main (String[] args)
     {
         System.out.println(copyright);
         System.out.println();
 
         // Parse debug, share/ip and torrent file options.
-        Snark snark = parseArguments(args);
+        Snark snark = parseArguments(args, new ConsoleStorageReporter(), null);
         boolean interactive = true;
+        boolean showPeers = false;
         for (String arg : args) {
             if (arg.equals("--no-commands")) {
                 interactive = false;
             }
-        }
-        ;
-        snark.setupNetwork();
-        snark.collectPieces();
+            if (arg.equals("--show-peers") || arg.equals("--share")) {
+                showPeers = true;
+            }
+        };
 
+        // Set things up to exit gracefully
         ShutdownListener listener = new ShutdownListener() {
             // documentation inherited from interface ShutdownListener
             public void shutdown ()
@@ -68,12 +58,19 @@ public class SnarkApplication
             snark.coordinator, snark.acceptor, snark.trackerclient, listener);
         Runtime.getRuntime().addShutdownHook(hook);
 
-        Timer timer = new Timer(true);
-        TimerTask monitor = new PeerMonitorTask(snark.coordinator);
-        timer.schedule(monitor, PeerMonitorTask.MONITOR_PERIOD,
-            PeerMonitorTask.MONITOR_PERIOD);
+        // Let's start grabbing files!
+        snark.setupNetwork();
+        snark.collectPieces();
 
-        // Start command interpreter
+        // If requested, periodically monitor progress.
+        if (showPeers) {
+            Timer timer = new Timer(true);
+            TimerTask monitor = new PeerMonitorTask(snark.coordinator);
+            timer.schedule(monitor, PeerMonitorTask.MONITOR_PERIOD,
+                PeerMonitorTask.MONITOR_PERIOD);
+        }
+
+        // Start interactive command interpreter if desired
         if (interactive) {
             doInteractive(snark, hook);
         }
@@ -138,7 +135,7 @@ public class SnarkApplication
                 }
             }
         } catch (IOException ioe) {
-            log.log(Level.SEVERE, "ERROR while reading stdin", ioe);
+            log.log(Level.SEVERE, "Unable to read stdin", ioe);
         }
 
         // Explicit shutdown.
@@ -151,25 +148,28 @@ public class SnarkApplication
      */
     protected static void usage (String s)
     {
+        PrintStream stream = System.out;
         if (s != null) {
-            System.out.println("snark: " + s);
+            stream = System.err;
+            stream.println("snark: " + s);
         }
-        System.out.println("Usage: snark [--debug [level]] [--no-commands] [--port <port>]");
-        System.out.println("             [--share (<ip>|<host>)] (<url>|<file>|<dir>)");
-        System.out.println("  --debug\tShows some extra info and stacktraces");
-        System.out.println("    level\tHow much debug details to show");
-        System.out.println("         \t(defaults to " + Level.SEVERE
+        stream.println("Usage: snark [--debug [level]] [--no-commands] [--port <port>]");
+        stream.println("  [--show-peers] [--share (<ip>|<host>)] (<url>|<file>|<dir>)");
+        stream.println("  --debug\tShows some extra info and stacktraces");
+        stream.println("    level\tHow much debug details to show");
+        stream.println("         \t(defaults to " + Level.SEVERE
             + ", with --debug to " + Level.INFO + ", highest level is "
             + Level.ALL + ").");
-        System.out.println("  --no-commands\tDon't read interactive commands or show usage info.");
-        System.out.println("  --port\tThe port to listen on for incomming connections");
-        System.out.println("        \t(if not given defaults to first free port between "
+        stream.println("  --no-commands\tDon't read interactive commands or show usage info.");
+        stream.println("  --port\tThe port to listen on for incomming connections");
+        stream.println("        \t(if not given defaults to first free port between "
             + Snark.MIN_PORT + "-" + Snark.MAX_PORT + ").");
-        System.out.println("  --share\tStart torrent tracker on <ip> address or <host> name.");
-        System.out.println("  <url>  \tURL pointing to .torrent metainfo file to download/share.");
-        System.out.println("  <file> \tEither a local .torrent metainfo file to download");
-        System.out.println("         \tor (with --share) a file to share.");
-        System.out.println("  <dir>  \tA directory with files to share (needs --share).");
+        stream.println("  --show-peers\tIf enabled, periodically prints peer information.");
+        stream.println("  --share\tStart torrent tracker on <ip> address or <host> name.");
+        stream.println("  <url>  \tURL pointing to .torrent metainfo file to download/share.");
+        stream.println("  <file> \tEither a local .torrent metainfo file to download");
+        stream.println("         \tor (with --share) a file to share.");
+        stream.println("  <dir>  \tA directory with files to share (needs --share).");
         System.exit(-1);
     }
 
@@ -225,9 +225,12 @@ public class SnarkApplication
                 }
                 ip = args[i + 1];
                 i += 2;
-            } else if (args[i].equals("--no-commands")) {
+            } else if (args[i].equals("--no-commands") ||
+                    args[i].equals("--show-peers")) {
                 // ignore, processed elsewhere.
                 i++;
+            } else if (args[i].equals("--help")) {
+                usage(null);
             } else {
                 torrent = args[i];
                 i++;
@@ -248,6 +251,25 @@ public class SnarkApplication
         Snark snark = new Snark(torrent, ip, user_port, slistener, clistener);
         return snark;
     }
+
+    protected static final String newline = System.getProperty("line.separator");
+
+    protected static final String copyright =
+        "The Hunting of the Snark Project - "
+        + "Copyright (C) 2003 Mark J. Wielaard, (c) 2006 Three Rings Design"
+        + newline
+        + newline
+        + "Snark comes with ABSOLUTELY NO WARRANTY.  This is free software, and"
+        + newline
+        + "you are welcome to redistribute it under certain conditions; read the"
+        + newline + "COPYING file for details.";
+
+    /** The message displayed when entering the interactive interface */
+    protected static final String usage =
+        "Press return for help. Type \"quit\" and return to stop.";
+
+    /** A list of commands that the interactive interface accepts */
+    protected static final String help = "Commands: 'info', 'list', 'quit'.";
 
     /** The Java logger used to process our log events. */
     protected static final Logger log = Logger.getLogger("org.klomp.snark.cmd");

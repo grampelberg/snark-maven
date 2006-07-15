@@ -236,5 +236,6 @@ public class TrackerClient extends Thread
         return sb.toString();
     }
 
+    /** The Java logger used to process our log events. */
     protected static final Logger log = Logger.getLogger("org.klomp.snark.TrackerClient");
 }

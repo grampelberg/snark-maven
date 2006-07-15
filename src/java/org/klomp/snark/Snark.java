@@ -41,85 +41,85 @@ import org.klomp.snark.bencode.BDecoder;
  * 
  * @author Mark Wielaard (mark@klomp.org)
  */
-public class Snark implements StorageListener, CoordinatorListener
+public class Snark
 {
+    /** The lowest port Snark will listen on for connections */
     public final static int MIN_PORT = 6881;
 
+    /** The highest port Snark will listen on for connections */
     public final static int MAX_PORT = 6889;
 
-    // String indicating main activity
-    public String activity = "Not started";
-
+    /** The path to the file being torrented */
     public String torrent;
 
+    /** The metadata known about the torrent */
     public MetaInfo meta;
 
+    /** The storage helper assisting us */
     public Storage storage;
 
-    protected int user_port;
-
-    protected int port;
-
-    protected String ip;
-
-    protected StorageListener slistener;
-
-    protected CoordinatorListener clistener;
-
-    protected byte[] id;
-
-    protected ServerSocket serversocket;
-
+    /** The coordinator managing our peers */
     public PeerCoordinator coordinator;
 
+    /** Parcels out incoming requests to the appropriate places */
     public ConnectionAcceptor acceptor;
 
+    /** Obtains information on new peers. */
     public TrackerClient trackerclient;
 
-    public Snark(String torrent, String ip, int user_port,
-            StorageListener slistener, CoordinatorListener clistener)
+    /**
+     * Constructs a Snark client.
+     * @param torrent The address of the torrent to download or file to serve
+     * @param ip The IP address to use when serving data
+     * @param user_port The port number to use
+     * @param slistener A custom {@link StorageListener} to use
+     * @param clistener A custom {@link CoordinatorListener} to use
+     */
+    public Snark (String torrent, String ip, int user_port,
+        StorageListener slistener, CoordinatorListener clistener)
     {
-        if (slistener == null) {
-            this.slistener = this;
-        } else {
-            this.slistener = slistener;
-        }
-
-        if (clistener == null) {
-            this.clistener = this;
-        } else {
-            this.clistener = clistener;
-        }
-
+        this.slistener = slistener;
+        this.clistener = clistener;
         this.torrent = torrent;
         this.user_port = user_port;
         this.ip = ip;
     }
 
+    /**
+     * Sets the global logging level of Snark.
+     */
     public static void setLogLevel (Level level)
     {
         log.setLevel(level);
     }
 
-    public void setupNetwork()
+    /**
+     * Returns a human-readable state of Snark.
+     */
+    public String getStateString ()
     {
-        activity = "Network setup";
+        return activities[activity];
+    }
 
-        // "Taking Three as the subject to reason about--
-        // A convenient number to state--
-        // We add Seven, and Ten, and then multiply out
-        // By One Thousand diminished by Eight.
-        //
-        // "The result we proceed to divide, as you see,
-        // By Nine Hundred and Ninety Two:
-        // Then subtract Seventeen, and the answer must be
-        // Exactly and perfectly true.
+    /**
+     * Returns the integer code for the human-readable state of Snark.
+     */
+    public int getState ()
+    {
+        return activity;
+    }
+
+    /**
+     * Establishes basic information such as {@link #id}, opens ports,
+     * and determines whether to act as a peer or seed.
+     */
+    public void setupNetwork ()
+    {
+        activity = NETWORK_SETUP;
 
         // Create a new ID and fill it with something random. First nine
         // zeros bytes, then three bytes filled with snark and then
         // sixteen random bytes.
-        byte snark = (((3 + 7 + 10) * (1000 - 8)) / 992) - 17;
-        id = new byte[20];
         Random random = new Random();
         int i;
         for (i = 0; i < 9; i++) {
@@ -155,7 +155,7 @@ public class Snark implements StorageListener, CoordinatorListener
             String message = "Cannot accept incoming connections ";
             if (user_port == -1) {
                 message = message + "tried ports " + MIN_PORT + " - "
-                        + MAX_PORT;
+                    + MAX_PORT;
             } else {
                 message = message + "on port " + user_port;
             }
@@ -180,7 +180,7 @@ public class Snark implements StorageListener, CoordinatorListener
             if (f.exists()) {
                 in = new FileInputStream(f);
             } else {
-                activity = "Getting torrent";
+                activity = GETTING_TORRENT;
                 URL u = new URL(torrent);
                 URLConnection c = u.openConnection();
                 c.connect();
@@ -192,7 +192,7 @@ public class Snark implements StorageListener, CoordinatorListener
                     if (code / 100 != 2) {
                         // responses
                         fatal("Loading page '" + torrent + "' gave error code "
-                                + code + ", it probably doesn't exists");
+                            + code + ", it probably doesn't exists");
                     }
                 }
             }
@@ -202,24 +202,24 @@ public class Snark implements StorageListener, CoordinatorListener
             if (f != null && f.exists()) {
                 if (ip == null) {
                     fatal("'" + torrent + "' exists,"
-                            + " but is not a valid torrent metainfo file."
-                            + System.getProperty("line.separator")
-                            + "  (use --share to create a torrent from it"
-                            + " and start sharing)", ioe);
+                        + " but is not a valid torrent metainfo file."
+                        + System.getProperty("line.separator")
+                        + "  (use --share to create a torrent from it"
+                        + " and start sharing)", ioe);
                 } else {
                     // Try to create a new metainfo file
                     log.log(Level.INFO,
-                        "Trying to create metainfo torrent for '"
-                        + torrent + "'");
+                        "Trying to create metainfo torrent for '" + torrent
+                            + "'");
                     try {
-                        activity = "Creating torrent";
+                        activity = CREATING_TORRENT;
                         storage = new Storage(f, "http://" + ip + ":" + port
-                                + "/announce", slistener);
+                            + "/announce", slistener);
                         storage.create();
                         meta = storage.getMetaInfo();
                     } catch (IOException ioe2) {
                         fatal("Could not create torrent for '" + torrent + "'",
-                                ioe2);
+                            ioe2);
                     }
                 }
             } else {
@@ -233,7 +233,7 @@ public class Snark implements StorageListener, CoordinatorListener
         // it already exists.
         if (storage == null) {
             try {
-                activity = "Checking storage";
+                activity = CHECKING_STORAGE;
                 storage = new Storage(meta, slistener);
                 storage.check();
             } catch (IOException ioe) {
@@ -242,28 +242,31 @@ public class Snark implements StorageListener, CoordinatorListener
         }
     }
 
-    public void collectPieces()
+    /**
+     * Start the upload/download process and begins exchanging pieces
+     * with other peers.
+     */
+    public void collectPieces ()
     {
-        activity = "Collecting pieces";
+        activity = COLLECTING_PIECES;
         coordinator = new PeerCoordinator(id, meta, storage, clistener);
         HttpAcceptor httpacceptor;
         if (ip != null) {
             MetaInfo m = meta.reannounce("http://" + ip + ":" + port
-                    + "/announce");
+                + "/announce");
             Tracker tracker = new Tracker(m);
             try {
-                tracker
-                        .addPeer(new PeerID(id, InetAddress.getByName(ip), port));
+                tracker.addPeer(new PeerID(id, InetAddress.getByName(ip), port));
             } catch (UnknownHostException oops) {
                 fatal("Could not start tracker for " + ip, oops);
             }
             httpacceptor = new HttpAcceptor(tracker);
             byte[] torrentData = tracker.getMetaInfo().getTorrentData();
             try {
-                log.log(Level.INFO,
-                    "Writing torrent to file " + torrent + ".torrent");
+                log.log(Level.INFO, "Writing torrent to file " + torrent
+                    + ".torrent");
                 FileOutputStream fos = new FileOutputStream(torrent
-                        + ".torrent");
+                    + ".torrent");
                 fos.write(torrentData);
                 fos.close();
             } catch (IOException e) {
@@ -275,12 +278,12 @@ public class Snark implements StorageListener, CoordinatorListener
 
         PeerAcceptor peeracceptor = new PeerAcceptor(coordinator);
         ConnectionAcceptor acceptor = new ConnectionAcceptor(serversocket,
-                httpacceptor, peeracceptor);
+            httpacceptor, peeracceptor);
         acceptor.start();
 
         if (ip != null) {
-            log.log(Level.INFO, "Torrent available on " + "http://" + ip + ":" + port
-                    + "/metainfo.torrent");
+            log.log(Level.INFO, "Torrent available on " + "http://" + ip + ":"
+                + port + "/metainfo.torrent");
         }
 
         trackerclient = new TrackerClient(meta, coordinator, port);
@@ -291,8 +294,8 @@ public class Snark implements StorageListener, CoordinatorListener
     /**
      * Aborts program abnormally.
      */
-    public static void fatal(String s)
-//        throws Exception
+    public static void fatal (String s)
+    // throws Exception
     {
         fatal(s, null);
     }
@@ -300,86 +303,68 @@ public class Snark implements StorageListener, CoordinatorListener
     /**
      * Aborts program abnormally.
      */
-    public static void fatal(String s, Throwable t)
-//        throws Exception
+    public static void fatal (String s, Throwable t)
+    // throws Exception
     {
+        // XXX throw an exception up to the application calling the library,
+        // instead of either System.exit()ing or swallowing it.
         log.log(Level.SEVERE, s, t);
-//        throw (Exception)t;
+        // throw (Exception)t;
     }
 
-    public void peerChange(PeerCoordinator coordinator, Peer peer)
-    {
-        // System.out.println(peer.toString());
-    }
+    /** The listen port requested by the user */
+    protected int user_port;
 
-    boolean allocating = false;
+    /** The port number Snark listens on */
+    protected int port;
 
-    public void storageCreateFile(Storage storage, String name, long length)
-    {
-        if (allocating) {
-            System.out.println(); // Done with last file.
-        }
+    /** The IP address to listen on, if applicable */
+    protected String ip;
 
-        System.out.print("Creating file '" + name + "' of length " + length
-                + ": ");
-        allocating = true;
-    }
+    /** The {@link StorageListener} to send updates to */
+    protected StorageListener slistener;
 
-    // How much storage space has been allocated
-    private long allocated = 0;
+    /** The {@link CoordinatorListener} to send updates to */
+    protected CoordinatorListener clistener;
 
-    public void storageAllocated(Storage storage, long length)
-    {
-        allocating = true;
-        System.out.print(".");
-        allocated += length;
-        if (allocated == meta.getTotalLength()) {
-            System.out.println(); // We have all the disk space we need.
-        }
-    }
+    /** Our BitTorrent client id number, randomly assigned */
+    protected byte[] id = new byte[20];
 
-    boolean allChecked = false;
+    /** The server socket that we are using to listen for connections */
+    protected ServerSocket serversocket;
 
-    boolean checking = false;
+    /**
+     * A magic constant used to identify the Snark library in the clientid.
+     * 
+     * <pre>Taking Three as the subject to reason about--
+     * A convenient number to state--
+     * We add Seven, and Ten, and then multiply out
+     * By One Thousand diminished by Eight.
+     *
+     * The result we proceed to divide, as you see,
+     * By Nine Hundred and Ninety Two:
+     * Then subtract Seventeen, and the answer must be
+     * Exactly and perfectly true.</pre>
+     */
+    protected static final byte snark =
+        (((3 + 7 + 10) * (1000 - 8)) / 992) - 17;
 
-    boolean prechecking = true;
+    /** An integer indicating Snark's current activity. */
+    protected int activity = NOT_STARTED;
 
-    public void storageChecked(Storage storage, int num, boolean checked)
-    {
-        allocating = false;
-        if (!allChecked && !checking) {
-            // Use the MetaInfo from the storage since our own might not
-            // yet be setup correctly.
-            MetaInfo meta = storage.getMetaInfo();
-            if (meta != null) {
-                System.out.print("Checking existing " + meta.getPieces()
-                        + " pieces: ");
-            }
-            checking = true;
-        }
-        if (checking) {
-            if (checked) {
-                System.out.print("+");
-            } else {
-                System.out.print("-");
-            }
-        } else {
-            log.log(Level.FINE,
-                "Got " + (checked ? "" : "BAD ") + "piece: " + num);
-        }
-    }
+    /** The list of possible activities */
+    protected static final String[] activities =
+        {"Not started", "Network setup", "Getting torrent", "Creating torrent",
+        "Checking storage", "Collecting pieces", "Seeding"};
 
-    public void storageAllChecked(Storage storage)
-    {
-        if (checking) {
-            System.out.println();
-        }
-
-        allChecked = true;
-        checking = false;
-    }
+    public static final int NOT_STARTED = 0;
+    public static final int NETWORK_SETUP = 1;
+    public static final int GETTING_TORRENT = 2;
+    public static final int CREATING_TORRENT = 3;
+    public static final int CHECKING_STORAGE = 4;
+    public static final int COLLECTING_PIECES = 5;
+    public static final int SEEDING = 6;
 
     /** The Java logger used to process our log events. */
-    protected static final Logger log =
-        Logger.getLogger("org.klomp.snark");
+    protected static final Logger log = Logger.getLogger("org.klomp.snark");
 }

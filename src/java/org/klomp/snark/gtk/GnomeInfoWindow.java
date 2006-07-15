@@ -20,6 +20,9 @@
 
 package org.klomp.snark.gtk;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.gnu.gtk.Button;
 import org.gnu.gtk.GtkStockItem;
 import org.gnu.gtk.HBox;
@@ -191,17 +194,6 @@ public class GnomeInfoWindow implements ButtonListener, LifeCycleListener
     }
 
     /**
-     * Handles Life Cycle events (Window close or delete).
-     */
-    public void lifeCycleEvent (LifeCycleEvent event)
-    {
-        if (event.isOfType(LifeCycleEvent.Type.DELETE)
-            || event.isOfType(LifeCycleEvent.Type.DESTROY)) {
-            window = null;
-        }
-    }
-
-    /**
      * Handles buttons (Peers, Close).
      */
     public void buttonEvent (ButtonEvent event)
@@ -214,8 +206,8 @@ public class GnomeInfoWindow implements ButtonListener, LifeCycleListener
                 window.destroy();
                 window = null;
             } else {
-                System.err.println("Unknow event: " + event + " from source: "
-                    + source);
+                log.log(Level.WARNING, "Unknown event: " + event +
+                    " from source: " + source);
             }
         }
     }
@@ -248,11 +240,20 @@ public class GnomeInfoWindow implements ButtonListener, LifeCycleListener
         peersWindow.update();
     }
 
+    // documentation inherited from interface LifeCycleListener
+    public void lifeCycleEvent (LifeCycleEvent event)
+    {
+    }
+
+    // documentation inherited from interface LifeCycleListener
     public boolean lifeCycleQuery (LifeCycleEvent arg0)
     {
-        // TODO Auto-generated method stub
+        window = null;
         return false;
     }
 
     protected Snark _snark;
+
+    /** The Java logger used to process our log events. */
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.gtk");
 }
