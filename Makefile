@@ -62,23 +62,24 @@ $(PROGRAM)-static: $(STATIC_SOURCES)
 $(PROGRAM)-gnome: $(GNOME-SOURCES)
 	$(JAVAC) $(JAVAC_FLAGS) \
 		-classpath /usr/share/java/gtk2.8.jar:/usr/share/java/gnome2.12.jar \
-		-d classes $(GNOME_SOURCES)
+		-d dist/classes $(GNOME_SOURCES)
 
 $(PROGRAM).jar: $(PROGRAM)-classes Manifest
-	$(JAR) cfm $(PROGRAM).jar Manifest -C classes/ .
+	$(JAR) cfm $(PROGRAM).jar Manifest -C dist/classes/ .
 
 Manifest:
 	echo "Main-Class: $(MAINCLASS)" > Manifest
 
 classes:
-	mkdir classes
+	mkdir dist
+	mkdir dist/classes
 
 $(PROGRAM)-classes: classes $(SOURCES)
-	$(JAVAC) $(JAVAC_FLAGS) -d classes $(SOURCES)
+	$(JAVAC) $(JAVAC_FLAGS) -d dist/classes $(SOURCES)
 
 all: $(PROGRAM) $(PROGRAM)-static $(PROGRAM).jar
 
 clean:
-	rm -rf classes Manifest $(PROGRAM) $(PROGRAM)-static $(PROGRAM).jar
+	rm -rf dist Manifest $(PROGRAM) $(PROGRAM)-static $(PROGRAM).jar
 
 .PHONY : all clean $(PROGRAM)-classes

@@ -81,7 +81,7 @@
   </target>
 
   <!-- build the java class files -->
-  <target name="compile" depends="prepare">
+  <target name="compile" depends="prepare,compute-builds">
     <javac srcdir="src/java" destdir="${classes.dir}"
            debug="on" optimize="{$build.optimize}" deprecation="on"
            source="1.5" target="1.5">
@@ -92,12 +92,13 @@
   </target>
 
   <!-- build the javadoc documentation -->
-  <target name="javadoc" depends="prepare">
+  <target name="javadoc" depends="prepare,compute-builds">
     <javadoc sourcepath="src/java" packagenames="org.klomp.*"
              destdir="${javadoc.home}" stylesheetfile="docs/stylesheet.css"
              additionalparam="-breakiterator"
              link="http://www.threerings.net/code/snark/snark/docs/api">
       <classpath refid="classpath"/>
+      <exclude name="org/klomp/snark/gtk/**" unless="build.interface.gtk"/>
       <link href="http://java.sun.com/j2se/1.5/docs/api/"/>
     </javadoc>
   </target>
