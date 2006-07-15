@@ -22,12 +22,12 @@ package org.klomp.snark;
 
 import org.gnu.glib.Fireable;
 import org.gnu.glib.Timer;
-import org.gnu.gnome.AboutDialog;
 import org.gnu.gnome.App;
 import org.gnu.gnome.AppBar;
 import org.gnu.gnome.PreferencesType;
 import org.gnu.gnome.Program;
 import org.gnu.gnome.UIInfo;
+import org.gnu.gtk.AboutDialog;
 import org.gnu.gtk.Gtk;
 import org.gnu.gtk.HBox;
 import org.gnu.gtk.Justification;
@@ -281,10 +281,12 @@ public class SnarkGnome implements Runnable, StorageListener,
     private void about()
     {
         String[] authors = { AUTHOR1, AUTHOR2 };
-        String[] documentors = {};
-        String translator = ""; // HACK - Cannot be null
-        About about = new About("The Hunting of the Snark Project", VERSION,
-                COPYING, COMMENT, authors, documentors, translator, null);
+        AboutDialog about = new AboutDialog();
+        about.setName("The Hunting of the Snark Project");
+        about.setVersion(VERSION);
+        about.setCopyright(COPYING);
+        about.setComments(COMMENT);
+        about.setAuthors(authors);
         about.show();
     }
 
