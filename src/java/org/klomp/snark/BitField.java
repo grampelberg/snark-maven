@@ -33,7 +33,7 @@ public class BitField
     /**
      * Creates a new BitField that represents <code>size</code> unset bits.
      */
-    public BitField(int size)
+    public BitField (int size)
     {
         this.size = size;
         int arraysize = ((size - 1) / 8) + 1;
@@ -48,7 +48,7 @@ public class BitField
      * @exception ArrayOutOfBoundsException
      *                if give byte array is not large enough.
      */
-    public BitField(byte[] bitfield, int size)
+    public BitField (byte[] bitfield, int size)
     {
         this.size = size;
         int arraysize = ((size - 1) / 8) + 1;
@@ -65,7 +65,7 @@ public class BitField
      * supposed to be always unset if they represent bits bigger then the size
      * of the bitfield.
      */
-    public byte[] getFieldBytes()
+    public byte[] getFieldBytes ()
     {
         return bitfield;
     }
@@ -74,7 +74,7 @@ public class BitField
      * Return the size of the BitField. The returned value is one bigger then
      * the last valid bit number (since bit numbers are counted from zero).
      */
-    public int size()
+    public int size ()
     {
         return size;
     }
@@ -85,7 +85,7 @@ public class BitField
      * @exception IndexOutOfBoundsException
      *                if bit is smaller then zero bigger then size (inclusive).
      */
-    public void set(int bit)
+    public void set (int bit)
     {
         if (bit < 0 || bit >= size) {
             throw new IndexOutOfBoundsException(Integer.toString(bit));
@@ -101,7 +101,7 @@ public class BitField
      * @exception IndexOutOfBoundsException
      *                if bit is smaller then zero bigger then size (inclusive).
      */
-    public boolean get(int bit)
+    public boolean get (int bit)
     {
         if (bit < 0 || bit >= size) {
             throw new IndexOutOfBoundsException(Integer.toString(bit));
@@ -113,7 +113,7 @@ public class BitField
     }
 
     @Override
-    public String toString()
+    public String toString ()
     {
         // Not very efficient
         StringBuffer sb = new StringBuffer("BitField[");

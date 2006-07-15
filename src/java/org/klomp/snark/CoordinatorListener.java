@@ -29,5 +29,5 @@ public interface CoordinatorListener
     /**
      * Called when the PeerCoordinator notices a change in the state of a peer.
      */
-    void peerChange(PeerCoordinator coordinator, Peer peer);
+    void peerChange (PeerCoordinator coordinator, Peer peer);
 }

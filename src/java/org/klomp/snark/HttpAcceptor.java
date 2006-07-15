@@ -37,17 +37,17 @@ import java.util.logging.Logger;
 public class HttpAcceptor
 {
     private static final String SNARKHTML = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"
-            + "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\""
-            + "\"http://www.w3.org/TR/html4/loose.dtd\">"
-            + "<html>"
-            + "<head><title>Snark Client</title></head>"
-            + "<body>"
-            + "<h1>Snark Client</h1>"
-            + "<p>Snark is a client for downloading and sharing files distributed with the BitTorrent protocol. It is not a normal webserver.</p>"
-            + "<p><a href=\"metainfo.torrent\">Torrent</a></p>"
-            + "<p><a href=\"announce\">Tracker</a></p>"
-            + "<hr><p>For more info see <a href=\"http://www.klomp.org/snark/\">The Hunting of the Snark Project</a></p>"
-            + "</body>" + "</html>";
+        + "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\""
+        + "\"http://www.w3.org/TR/html4/loose.dtd\">"
+        + "<html>"
+        + "<head><title>Snark Client</title></head>"
+        + "<body>"
+        + "<h1>Snark Client</h1>"
+        + "<p>Snark is a client for downloading and sharing files distributed with the BitTorrent protocol. It is not a normal webserver.</p>"
+        + "<p><a href=\"metainfo.torrent\">Torrent</a></p>"
+        + "<p><a href=\"announce\">Tracker</a></p>"
+        + "<hr><p>For more info see <a href=\"http://www.klomp.org/snark/\">The Hunting of the Snark Project</a></p>"
+        + "</body>" + "</html>";
 
     private static final byte[] SNARKPAGE;
 
@@ -81,16 +81,16 @@ public class HttpAcceptor
      * Creates a HttpAcceptor that can handle torrent metadata of the given
      * Tracker.
      */
-    public HttpAcceptor(Tracker tracker)
+    public HttpAcceptor (Tracker tracker)
     {
         this.tracker = tracker;
     }
 
-    public void connection(Socket sock, BufferedInputStream bis,
-            BufferedOutputStream bos) throws IOException
+    public void connection (Socket sock, BufferedInputStream bis,
+        BufferedOutputStream bos) throws IOException
     {
         BufferedReader br = new BufferedReader(
-                new InputStreamReader(bis, ASCII));
+            new InputStreamReader(bis, ASCII));
 
         String resource = readRequest(br);
         log.log(Level.FINE, "HTTP request for: " + resource);
@@ -104,7 +104,7 @@ public class HttpAcceptor
             } else if (resource.startsWith("/announce")) {
                 Map params = parseParams(resource);
                 byte[] response = tracker.handleRequest(sock.getInetAddress(),
-                        sock.getPort(), params);
+                    sock.getPort(), params);
                 sendData(bos, response, "application/octet-stream");
             } else if (resource.equals("/metainfo.torrent")) {
                 byte[] torrent = tracker.getMetaInfo().getTorrentData();
@@ -124,7 +124,7 @@ public class HttpAcceptor
      * requests. Returns the (URLEncoded) requested resource or null if the
      * request wasn't a valid GET request.
      */
-    private static String readRequest(BufferedReader br) throws IOException
+    private static String readRequest (BufferedReader br) throws IOException
     {
         String request = br.readLine();
         if (request != null && request.startsWith("GET ")) {
@@ -145,8 +145,8 @@ public class HttpAcceptor
      * Consumes all headers and puts them into a Map mapping header value to
      * header key Strings.
      */
-    private static Map<String, String> readHeaders(BufferedReader br)
-            throws IOException
+    private static Map<String, String> readHeaders (BufferedReader br)
+        throws IOException
     {
         Map<String, String> m = new HashMap<String, String>();
         String header = br.readLine();
@@ -167,17 +167,17 @@ public class HttpAcceptor
     /**
      * Sends a HTTP OK, the necessary headers and the data.
      */
-    private static void sendData(OutputStream out, byte[] data,
-            String content_type) throws IOException
+    private static void sendData (OutputStream out, byte[] data,
+        String content_type) throws IOException
     {
         sendData(out, 200, "OK", data, content_type);
     }
 
-    private static void sendData(OutputStream out, int responseCode,
-            String reason, byte[] data, String content_type) throws IOException
+    private static void sendData (OutputStream out, int responseCode,
+        String reason, byte[] data, String content_type) throws IOException
     {
-        log.log(Level.FINER, "HTTP/1.0 " + responseCode + " " + reason + " " +
-                    content_type + " (" + data.length + " bytes)");
+        log.log(Level.FINER, "HTTP/1.0 " + responseCode + " " + reason + " "
+            + content_type + " (" + data.length + " bytes)");
         byte[] type = content_type.getBytes(ASCII);
 
         // Status line
@@ -203,11 +203,11 @@ public class HttpAcceptor
         out.flush();
     }
 
-    private static void sendError(OutputStream out, int responseCode,
-            String reason) throws IOException
+    private static void sendError (OutputStream out, int responseCode,
+        String reason) throws IOException
     {
         sendData(out, responseCode, reason, reason.getBytes(ASCII),
-                "text/plain");
+            "text/plain");
     }
 
     /**
@@ -215,7 +215,7 @@ public class HttpAcceptor
      * expects a '?' and the urlencoded key=value pairs. Note that the key and
      * value are NOT url decoded before putting in the paramaters map.
      */
-    private static Map<String, String> parseParams(String request)
+    private static Map<String, String> parseParams (String request)
     {
         Map<String, String> m = new HashMap<String, String>();
         int index = request.indexOf('?');
@@ -236,6 +236,5 @@ public class HttpAcceptor
     }
 
     /** The Java logger used to process our log events. */
-    protected static final Logger log =
-        Logger.getLogger("org.klomp.snark.server");
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.server");
 }

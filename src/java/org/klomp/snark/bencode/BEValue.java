@@ -37,22 +37,22 @@ public class BEValue
     // This is either a byte[], Number, List or Map.
     private final Object value;
 
-    public BEValue(byte[] value)
+    public BEValue (byte[] value)
     {
         this.value = value;
     }
 
-    public BEValue(Number value)
+    public BEValue (Number value)
     {
         this.value = value;
     }
 
-    public BEValue(List value)
+    public BEValue (List value)
     {
         this.value = value;
     }
 
-    public BEValue(Map value)
+    public BEValue (Map value)
     {
         this.value = value;
     }
@@ -62,7 +62,7 @@ public class BEValue
      * BEValue is a byte[], otherwise it will throw a InvalidBEncodingException.
      * The byte[] will be interpreted as UTF-8 encoded characters.
      */
-    public String getString() throws InvalidBEncodingException
+    public String getString () throws InvalidBEncodingException
     {
         try {
             return new String(getBytes(), "UTF-8");
@@ -78,7 +78,7 @@ public class BEValue
      * BEValue is actually a byte[], otherwise it will throw a
      * InvalidBEncodingException.
      */
-    public byte[] getBytes() throws InvalidBEncodingException
+    public byte[] getBytes () throws InvalidBEncodingException
     {
         try {
             return (byte[])value;
@@ -92,7 +92,7 @@ public class BEValue
      * BEValue is actually a Number, otherwise it will throw a
      * InvalidBEncodingException.
      */
-    public Number getNumber() throws InvalidBEncodingException
+    public Number getNumber () throws InvalidBEncodingException
     {
         try {
             return (Number)value;
@@ -107,7 +107,7 @@ public class BEValue
      * InvalidBEncodingException. The returned int is the result of
      * <code>Number.intValue()</code>.
      */
-    public int getInt() throws InvalidBEncodingException
+    public int getInt () throws InvalidBEncodingException
     {
         return getNumber().intValue();
     }
@@ -118,7 +118,7 @@ public class BEValue
      * InvalidBEncodingException. The returned long is the result of
      * <code>Number.longValue()</code>.
      */
-    public long getLong() throws InvalidBEncodingException
+    public long getLong () throws InvalidBEncodingException
     {
         return getNumber().longValue();
     }
@@ -128,7 +128,7 @@ public class BEValue
      * when the BEValue is actually a List, otherwise it will throw a
      * InvalidBEncodingException.
      */
-    public List<BEValue> getList() throws InvalidBEncodingException
+    public List<BEValue> getList () throws InvalidBEncodingException
     {
         try {
             return (List<BEValue>)value;
@@ -142,7 +142,7 @@ public class BEValue
      * operation only succeeds when the BEValue is actually a Map, otherwise it
      * will throw a InvalidBEncodingException.
      */
-    public Map getMap() throws InvalidBEncodingException
+    public Map getMap () throws InvalidBEncodingException
     {
         try {
             return (Map)value;
@@ -152,7 +152,7 @@ public class BEValue
     }
 
     @Override
-    public String toString()
+    public String toString ()
     {
         String valueString;
         if (value instanceof byte[]) {

@@ -67,14 +67,14 @@ public class BDecoder
     private final MessageDigest sha_digest;
 
     // Ugly hack. Return the SHA has over bytes that make up the special map.
-    public byte[] get_special_map_digest()
+    public byte[] get_special_map_digest ()
     {
         byte[] result = sha_digest.digest();
         return result;
     }
 
     // Ugly hack. Name defaults to "info".
-    public void set_special_map_name(String name)
+    public void set_special_map_name (String name)
     {
         special_map = name;
     }
@@ -83,7 +83,7 @@ public class BDecoder
      * Initalizes a new BDecoder. Nothing is read from the given
      * <code>InputStream</code> yet.
      */
-    public BDecoder(InputStream in)
+    public BDecoder (InputStream in)
     {
         this.in = in;
         // XXX - Used for ugly hack.
@@ -106,7 +106,7 @@ public class BDecoder
      * @exception IOException
      *                when somthing bad happens with the stream to read from.
      */
-    public static BEValue bdecode(InputStream in) throws IOException
+    public static BEValue bdecode (InputStream in) throws IOException
     {
         return new BDecoder(in).bdecode();
     }
@@ -118,7 +118,7 @@ public class BDecoder
      * 
      * This might or might not read one extra byte from the stream.
      */
-    public int getNextIndicator() throws IOException
+    public int getNextIndicator () throws IOException
     {
         if (indicator == 0) {
             indicator = in.read();
@@ -135,7 +135,7 @@ public class BDecoder
      * or bdecodes the rest of the stream and returns the appropriate BEValue
      * encoded object.
      */
-    public BEValue bdecode() throws IOException
+    public BEValue bdecode () throws IOException
     {
         indicator = getNextIndicator();
         if (indicator == -1) {
@@ -152,7 +152,7 @@ public class BDecoder
             return bdecodeMap();
         } else {
             throw new InvalidBEncodingException("Unknown indicator '"
-                    + indicator + "'");
+                + indicator + "'");
         }
     }
 
@@ -161,13 +161,13 @@ public class BDecoder
      * array. If it is not a bencoded byte array it will throw
      * InvalidBEncodingException.
      */
-    public BEValue bdecodeBytes() throws IOException
+    public BEValue bdecodeBytes () throws IOException
     {
         int c = getNextIndicator();
         int num = c - '0';
         if (num < 0 || num > 9) {
             throw new InvalidBEncodingException("Number expected, not '"
-                    + (char)c + "'");
+                + (char)c + "'");
         }
         indicator = 0;
 
@@ -182,7 +182,7 @@ public class BDecoder
 
         if (c != ':') {
             throw new InvalidBEncodingException("Colon expected, not '"
-                    + (char)c + "'");
+                + (char)c + "'");
         }
 
         return new BEValue(read(num));
@@ -192,12 +192,12 @@ public class BDecoder
      * Returns the next bencoded value on the stream and makes sure it is a
      * number. If it is not a number it will throw InvalidBEncodingException.
      */
-    public BEValue bdecodeNumber() throws IOException
+    public BEValue bdecodeNumber () throws IOException
     {
         int c = getNextIndicator();
         if (c != 'i') {
             throw new InvalidBEncodingException("Expected 'i', not '" + (char)c
-                    + "'");
+                + "'");
         }
         indicator = 0;
 
@@ -208,7 +208,7 @@ public class BDecoder
                 return new BEValue(BigInteger.ZERO);
             } else {
                 throw new InvalidBEncodingException("'e' expected after zero,"
-                        + " not '" + (char)c + "'");
+                    + " not '" + (char)c + "'");
             }
         }
 
@@ -227,7 +227,7 @@ public class BDecoder
 
         if (c < '1' || c > '9') {
             throw new InvalidBEncodingException("Invalid Integer start '"
-                    + (char)c + "'");
+                + (char)c + "'");
         }
         chars[off] = (char)c;
         off++;
@@ -253,12 +253,12 @@ public class BDecoder
      * Returns the next bencoded value on the stream and makes sure it is a
      * list. If it is not a list it will throw InvalidBEncodingException.
      */
-    public BEValue bdecodeList() throws IOException
+    public BEValue bdecodeList () throws IOException
     {
         int c = getNextIndicator();
         if (c != 'l') {
             throw new InvalidBEncodingException("Expected 'l', not '" + (char)c
-                    + "'");
+                + "'");
         }
         indicator = 0;
 
@@ -277,12 +277,12 @@ public class BDecoder
      * Returns the next bencoded value on the stream and makes sure it is a map
      * (dictonary). If it is not a map it will throw InvalidBEncodingException.
      */
-    public BEValue bdecodeMap() throws IOException
+    public BEValue bdecodeMap () throws IOException
     {
         int c = getNextIndicator();
         if (c != 'd') {
             throw new InvalidBEncodingException("Expected 'd', not '" + (char)c
-                    + "'");
+                + "'");
         }
         indicator = 0;
 
@@ -317,7 +317,7 @@ public class BDecoder
      * Returns the next byte read from the InputStream (as int). Throws
      * EOFException if InputStream.read() returned -1.
      */
-    private int read() throws IOException
+    private int read () throws IOException
     {
         int c = in.read();
         if (c == -1) {
@@ -336,7 +336,7 @@ public class BDecoder
      * bigger then requested but will only contain length valid bytes. The
      * returned byte[] will be reused when this method is called again.
      */
-    private byte[] read(int length) throws IOException
+    private byte[] read (int length) throws IOException
     {
         byte[] result = new byte[length];
 

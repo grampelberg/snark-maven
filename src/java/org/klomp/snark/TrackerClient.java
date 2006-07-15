@@ -58,7 +58,7 @@ public class TrackerClient extends Thread
 
     private long lastRequestTime;
 
-    public TrackerClient(MetaInfo meta, PeerCoordinator coordinator, int port)
+    public TrackerClient (MetaInfo meta, PeerCoordinator coordinator, int port)
     {
         // Set unique name.
         super("TrackerClient-" + urlencode(coordinator.getID()));
@@ -75,14 +75,14 @@ public class TrackerClient extends Thread
     /**
      * Interrupts this Thread to stop it.
      */
-    public void halt()
+    public void halt ()
     {
         stop = true;
         this.interrupt();
     }
 
     @Override
-    public void run()
+    public void run ()
     {
         // XXX - Support other IPs
         String announce = meta.getAnnounce();
@@ -101,7 +101,7 @@ public class TrackerClient extends Thread
                 try {
                     // Send start.
                     TrackerInfo info = doRequest(announce, infoHash, peerID,
-                            uploaded, downloaded, left, STARTED_EVENT);
+                        uploaded, downloaded, left, STARTED_EVENT);
                     Iterator it = info.getPeers().iterator();
                     while (it.hasNext()) {
                         coordinator.addPeer((Peer)it.next());
@@ -109,8 +109,8 @@ public class TrackerClient extends Thread
                     started = true;
                 } catch (IOException ioe) {
                     // Probably not fatal (if it doesn't last to long...)
-                    log.log(Level.WARNING, "Could not contact tracker at '" +
-                        announce, ioe);
+                    log.log(Level.WARNING, "Could not contact tracker at '"
+                        + announce, ioe);
                 }
 
                 if (!started && !stop) {
@@ -150,13 +150,11 @@ public class TrackerClient extends Thread
                 }
 
                 // Only do a request when necessary.
-                if (event == COMPLETED_EVENT
-                        || coordinator.needPeers()
-                        || System.currentTimeMillis() > lastRequestTime
-                                + interval) {
+                if (event == COMPLETED_EVENT || coordinator.needPeers()
+                    || System.currentTimeMillis() > lastRequestTime + interval) {
                     try {
                         TrackerInfo info = doRequest(announce, infoHash,
-                                peerID, uploaded, downloaded, left, event);
+                            peerID, uploaded, downloaded, left, event);
 
                         Iterator it = info.getPeers().iterator();
                         while (it.hasNext()) {
@@ -164,8 +162,8 @@ public class TrackerClient extends Thread
                         }
                     } catch (IOException ioe) {
                         // Probably not fatal (if it doesn't last to long...)
-                        log.log(Level.WARNING,
-                            "Could not contact tracker at '" + announce, ioe);
+                        log.log(Level.WARNING, "Could not contact tracker at '"
+                            + announce, ioe);
                     }
                 }
             }
@@ -174,21 +172,21 @@ public class TrackerClient extends Thread
         } finally {
             try {
                 doRequest(announce, infoHash, peerID, uploaded, downloaded,
-                        left, STOPPED_EVENT);
+                    left, STOPPED_EVENT);
             } catch (IOException ioe) { /* ignored */
             }
         }
 
     }
 
-    private TrackerInfo doRequest(String announce, String infoHash,
-            String peerID, long uploaded, long downloaded, long left,
-            String event) throws IOException
+    private TrackerInfo doRequest (String announce, String infoHash,
+        String peerID, long uploaded, long downloaded, long left, String event)
+        throws IOException
     {
         String s = announce + "?info_hash=" + infoHash + "&peer_id=" + peerID
-                + "&port=" + port + "&uploaded=" + uploaded + "&downloaded="
-                + downloaded + "&left=" + left
-                + ((event != NO_EVENT) ? ("&event=" + event) : "");
+            + "&port=" + port + "&uploaded=" + uploaded + "&downloaded="
+            + downloaded + "&left=" + left
+            + ((event != NO_EVENT) ? ("&event=" + event) : "");
         URL u = new URL(s);
         log.log(Level.FINE, "Sending TrackerClient request: " + u);
 
@@ -201,12 +199,12 @@ public class TrackerClient extends Thread
             int code = ((HttpURLConnection)c).getResponseCode();
             if (code / 100 != 2) {
                 throw new IOException("Loading '" + s + "' gave error code "
-                        + code + ", it probably doesn't exists");
+                    + code + ", it probably doesn't exists");
             }
         }
 
-        TrackerInfo info = new TrackerInfo(in, coordinator.getID(), coordinator
-                .getMetaInfo());
+        TrackerInfo info = new TrackerInfo(in, coordinator.getID(),
+            coordinator.getMetaInfo());
         log.log(Level.FINE, "TrackerClient response: " + info);
         lastRequestTime = System.currentTimeMillis();
 
@@ -223,7 +221,7 @@ public class TrackerClient extends Thread
      * Very lazy byte[] to URL encoder. Just encodes everything, even "normal"
      * chars.
      */
-    static String urlencode(byte[] bs)
+    static String urlencode (byte[] bs)
     {
         StringBuffer sb = new StringBuffer(bs.length * 3);
         for (byte element : bs) {
@@ -238,6 +236,5 @@ public class TrackerClient extends Thread
         return sb.toString();
     }
 
-    protected static final Logger log =
-        Logger.getLogger("org.klomp.snark.TrackerClient");
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.TrackerClient");
 }

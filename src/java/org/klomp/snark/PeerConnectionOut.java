@@ -40,7 +40,7 @@ class PeerConnectionOut implements Runnable
 
     private List<Message> sendQueue = new ArrayList<Message>();
 
-    public PeerConnectionOut(Peer peer, DataOutputStream dout)
+    public PeerConnectionOut (Peer peer, DataOutputStream dout)
     {
         this.peer = peer;
         this.dout = dout;
@@ -54,7 +54,7 @@ class PeerConnectionOut implements Runnable
      * Continuesly monitors for more outgoing messages that have to be send.
      * Stops if quit is true of an IOException occurs.
      */
-    public void run()
+    public void run ()
     {
         try {
             while (!quit) {
@@ -90,7 +90,7 @@ class PeerConnectionOut implements Runnable
                                 }
                                 nm = null;
                             } else if (nm.type == Message.REQUEST
-                                    && state.choked) {
+                                && state.choked) {
                                 it.remove();
                                 nm = null;
                             }
@@ -132,7 +132,7 @@ class PeerConnectionOut implements Runnable
         }
     }
 
-    public void disconnect()
+    public void disconnect ()
     {
         synchronized (sendQueue) {
             if (quit == true) {
@@ -151,7 +151,7 @@ class PeerConnectionOut implements Runnable
      * Adds a message to the sendQueue and notifies the method waiting on the
      * sendQueue to change.
      */
-    private void addMessage(Message m)
+    private void addMessage (Message m)
     {
         synchronized (sendQueue) {
             sendQueue.add(m);
@@ -167,7 +167,7 @@ class PeerConnectionOut implements Runnable
      * @returns true when a message of the given type was removed, false
      *          otherwise.
      */
-    private boolean removeMessage(int type)
+    private boolean removeMessage (int type)
     {
         boolean removed = false;
         synchronized (sendQueue) {
@@ -183,14 +183,14 @@ class PeerConnectionOut implements Runnable
         return removed;
     }
 
-    void sendAlive()
+    void sendAlive ()
     {
         Message m = new Message();
         m.type = Message.KEEP_ALIVE;
         addMessage(m);
     }
 
-    void sendChoke(boolean choke)
+    void sendChoke (boolean choke)
     {
         // We cancel the (un)choke but keep PIECE messages.
         // PIECE messages are purged if a choke is actually send.
@@ -208,11 +208,11 @@ class PeerConnectionOut implements Runnable
         }
     }
 
-    void sendInterest(boolean interest)
+    void sendInterest (boolean interest)
     {
         synchronized (sendQueue) {
             int inverseType = interest ? Message.UNINTERESTED
-                    : Message.INTERESTED;
+                : Message.INTERESTED;
             if (!removeMessage(inverseType)) {
                 Message m = new Message();
                 if (interest) {
@@ -225,7 +225,7 @@ class PeerConnectionOut implements Runnable
         }
     }
 
-    void sendHave(int piece)
+    void sendHave (int piece)
     {
         Message m = new Message();
         m.type = Message.HAVE;
@@ -233,7 +233,7 @@ class PeerConnectionOut implements Runnable
         addMessage(m);
     }
 
-    void sendBitfield(BitField bitfield)
+    void sendBitfield (BitField bitfield)
     {
         Message m = new Message();
         m.type = Message.BITFIELD;
@@ -243,7 +243,7 @@ class PeerConnectionOut implements Runnable
         addMessage(m);
     }
 
-    void sendRequests(List requests)
+    void sendRequests (List requests)
     {
         Iterator it = requests.iterator();
         while (it.hasNext()) {
@@ -252,7 +252,7 @@ class PeerConnectionOut implements Runnable
         }
     }
 
-    void sendRequest(Request req)
+    void sendRequest (Request req)
     {
         Message m = new Message();
         m.type = Message.REQUEST;
@@ -262,7 +262,7 @@ class PeerConnectionOut implements Runnable
         addMessage(m);
     }
 
-    void sendPiece(int piece, int begin, int length, byte[] bytes)
+    void sendPiece (int piece, int begin, int length, byte[] bytes)
     {
         Message m = new Message();
         m.type = Message.PIECE;
@@ -275,7 +275,7 @@ class PeerConnectionOut implements Runnable
         addMessage(m);
     }
 
-    void sendCancel(Request req)
+    void sendCancel (Request req)
     {
         // See if it is still in our send queue
         synchronized (sendQueue) {
@@ -283,7 +283,7 @@ class PeerConnectionOut implements Runnable
             while (it.hasNext()) {
                 Message m = (Message)it.next();
                 if (m.type == Message.REQUEST && m.piece == req.piece
-                        && m.begin == req.off && m.length == req.len) {
+                    && m.begin == req.off && m.length == req.len) {
                     it.remove();
                 }
             }
@@ -301,20 +301,19 @@ class PeerConnectionOut implements Runnable
     // Called by the PeerState when the other side doesn't want this
     // request to be handled anymore. Removes any pending Piece Message
     // from out send queue.
-    void cancelRequest(int piece, int begin, int length)
+    void cancelRequest (int piece, int begin, int length)
     {
         synchronized (sendQueue) {
             Iterator it = sendQueue.iterator();
             while (it.hasNext()) {
                 Message m = (Message)it.next();
                 if (m.type == Message.PIECE && m.piece == piece
-                        && m.begin == begin && m.length == length) {
+                    && m.begin == begin && m.length == length) {
                     it.remove();
                 }
             }
         }
     }
 
-    protected static final Logger log =
-        Logger.getLogger("org.klomp.snark.peer");
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.peer");
 }

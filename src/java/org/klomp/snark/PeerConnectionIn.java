@@ -35,14 +35,14 @@ class PeerConnectionIn implements Runnable
 
     private boolean quit;
 
-    public PeerConnectionIn(Peer peer, DataInputStream din)
+    public PeerConnectionIn (Peer peer, DataInputStream din)
     {
         this.peer = peer;
         this.din = din;
         quit = false;
     }
 
-    void disconnect()
+    void disconnect ()
     {
         if (quit == true) {
             return;
@@ -55,7 +55,7 @@ class PeerConnectionIn implements Runnable
         }
     }
 
-    public void run()
+    public void run ()
     {
         thread = Thread.currentThread();
         try {
@@ -146,6 +146,5 @@ class PeerConnectionIn implements Runnable
         }
     }
 
-    protected static final Logger log =
-        Logger.getLogger("org.klomp.snark.peer");
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.peer");
 }

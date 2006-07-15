@@ -46,27 +46,27 @@ public class Tracker
 
     private Set<PeerID> peers = new HashSet<PeerID>();
 
-    public Tracker(MetaInfo metainfo)
+    public Tracker (MetaInfo metainfo)
     {
         this.metainfo = metainfo;
     }
 
-    public MetaInfo getMetaInfo()
+    public MetaInfo getMetaInfo ()
     {
         return metainfo;
     }
 
-    public void addPeer(PeerID peer)
+    public void addPeer (PeerID peer)
     {
         synchronized (peers) {
             peers.add(peer);
         }
     }
 
-    public byte[] handleRequest(InetAddress address, int port, Map params)
+    public byte[] handleRequest (InetAddress address, int port, Map params)
     {
-        log.log(Level.FINE, "TrackerReq " + address + ":" + port +
-            " -> " + params);
+        log.log(Level.FINE, "TrackerReq " + address + ":" + port + " -> "
+            + params);
 
         byte[] info_hash;
         String info_hash_value = (String)params.get("info_hash");
@@ -143,7 +143,7 @@ public class Tracker
         return BEncoder.bencode(response);
     }
 
-    private static byte[] failure(String s)
+    private static byte[] failure (String s)
     {
         Map<String, String> m = new HashMap<String, String>();
         m.put("failure reason", s);
@@ -153,7 +153,7 @@ public class Tracker
     /**
      * Cheap (but slow) urldecode String to byte array.
      */
-    static byte[] urldecode(String s)
+    static byte[] urldecode (String s)
     {
         s = s.replace('+', ' ');
         char[] cs = s.toCharArray();
@@ -165,7 +165,7 @@ public class Tracker
                 i++;
             } else if (i + 2 < cs.length) {
                 int val = 16 * Character.digit(cs[i + 1], 16)
-                        + Character.digit(cs[i + 2], 16);
+                    + Character.digit(cs[i + 2], 16);
                 baos.write((byte)val);
                 i += 3;
             } else {
@@ -175,6 +175,5 @@ public class Tracker
         return baos.toByteArray();
     }
 
-    protected static final Logger log =
-        Logger.getLogger("org.klomp.snark.Tracker");
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.Tracker");
 }

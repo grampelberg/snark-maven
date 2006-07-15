@@ -67,7 +67,7 @@ class Message
     int len;
 
     /** Utility method for sending a message through a DataStream. */
-    void sendMessage(DataOutputStream dos) throws IOException
+    void sendMessage (DataOutputStream dos) throws IOException
     {
         // KEEP_ALIVE is special.
         if (type == KEEP_ALIVE) {
@@ -126,7 +126,7 @@ class Message
     }
 
     @Override
-    public String toString()
+    public String toString ()
     {
         switch (type) {
         case KEEP_ALIVE:

@@ -35,17 +35,17 @@ public class PeerAcceptor
 {
     private final PeerCoordinator coordinator;
 
-    public PeerAcceptor(PeerCoordinator coordinator)
+    public PeerAcceptor (PeerCoordinator coordinator)
     {
         this.coordinator = coordinator;
     }
 
-    public void connection(Socket socket, BufferedInputStream bis,
-            BufferedOutputStream bos) throws IOException
+    public void connection (Socket socket, BufferedInputStream bis,
+        BufferedOutputStream bos) throws IOException
     {
         if (coordinator.needPeers()) {
             Peer peer = new Peer(socket, bis, bos, coordinator.getID(),
-                    coordinator.getMetaInfo());
+                coordinator.getMetaInfo());
             coordinator.addPeer(peer);
         } else {
             socket.close();

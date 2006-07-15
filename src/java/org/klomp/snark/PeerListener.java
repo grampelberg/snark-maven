@@ -32,7 +32,7 @@ public interface PeerListener
      * @param peer
      *            the Peer that just got connected.
      */
-    void connected(Peer peer);
+    void connected (Peer peer);
 
     /**
      * Called when the connection to the peer was terminated or the connection
@@ -41,7 +41,7 @@ public interface PeerListener
      * @param peer
      *            the Peer that just got disconnected.
      */
-    void disconnected(Peer peer);
+    void disconnected (Peer peer);
 
     /**
      * Called when a choke message is received.
@@ -52,7 +52,7 @@ public interface PeerListener
      *            true when the peer got a choke message, false when the peer
      *            got an unchoke message.
      */
-    void gotChoke(Peer peer, boolean choke);
+    void gotChoke (Peer peer, boolean choke);
 
     /**
      * Called when an interested message is received.
@@ -63,7 +63,7 @@ public interface PeerListener
      *            true when the peer got a interested message, false when the
      *            peer got an uninterested message.
      */
-    void gotInterest(Peer peer, boolean interest);
+    void gotInterest (Peer peer, boolean interest);
 
     /**
      * Called when a have piece message is received. If the method returns true
@@ -78,7 +78,7 @@ public interface PeerListener
      * @return true when it is a piece that we want, false if the piece is
      *         already known.
      */
-    boolean gotHave(Peer peer, int piece);
+    boolean gotHave (Peer peer, int piece);
 
     /**
      * Called when a bitmap message is received. If this method returns true a
@@ -92,7 +92,7 @@ public interface PeerListener
      * @return true when the BitField contains pieces we want, false if the
      *         piece is already known.
      */
-    boolean gotBitField(Peer peer, BitField bitfield);
+    boolean gotBitField (Peer peer, BitField bitfield);
 
     /**
      * Called when a piece is received from the peer. The piece must be
@@ -109,7 +109,7 @@ public interface PeerListener
      * 
      * @return true when the bytes represent the piece, false otherwise.
      */
-    boolean gotPiece(Peer peer, int piece, byte[] bs);
+    boolean gotPiece (Peer peer, int piece, byte[] bs);
 
     /**
      * Called when the peer wants (part of) a piece from us. Only called when
@@ -124,7 +124,7 @@ public interface PeerListener
      * @return a byte array containing the piece or null when the piece is not
      *         available (which is a protocol error).
      */
-    byte[] gotRequest(Peer peer, int piece);
+    byte[] gotRequest (Peer peer, int piece);
 
     /**
      * Called when a (partial) piece has been downloaded from the peer.
@@ -134,7 +134,7 @@ public interface PeerListener
      * @param size
      *            the number of bytes that where downloaded.
      */
-    void downloaded(Peer peer, int size);
+    void downloaded (Peer peer, int size);
 
     /**
      * Called when a (partial) piece has been uploaded to the peer.
@@ -144,7 +144,7 @@ public interface PeerListener
      * @param size
      *            the number of bytes that where uploaded.
      */
-    void uploaded(Peer peer, int size);
+    void uploaded (Peer peer, int size);
 
     /**
      * Called when we are downloading from the peer and need to ask for a new
@@ -159,5 +159,5 @@ public interface PeerListener
      * @return one of the pieces from the bitfield that we want or -1 if we are
      *         no longer interested in the peer.
      */
-    int wantPiece(Peer peer, BitField bitfield);
+    int wantPiece (Peer peer, BitField bitfield);
 }

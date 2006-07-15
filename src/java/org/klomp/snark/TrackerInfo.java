@@ -40,20 +40,20 @@ public class TrackerInfo
 
     private final Set peers;
 
-    public TrackerInfo(InputStream in, byte[] my_id, MetaInfo metainfo)
-            throws IOException
+    public TrackerInfo (InputStream in, byte[] my_id, MetaInfo metainfo)
+        throws IOException
     {
         this(new BDecoder(in), my_id, metainfo);
     }
 
-    public TrackerInfo(BDecoder be, byte[] my_id, MetaInfo metainfo)
-            throws IOException
+    public TrackerInfo (BDecoder be, byte[] my_id, MetaInfo metainfo)
+        throws IOException
     {
         this(be.bdecodeMap().getMap(), my_id, metainfo);
     }
 
-    public TrackerInfo(Map m, byte[] my_id, MetaInfo metainfo)
-            throws IOException
+    public TrackerInfo (Map m, byte[] my_id, MetaInfo metainfo)
+        throws IOException
     {
         BEValue reason = (BEValue)m.get("failure reason");
         if (reason != null) {
@@ -77,20 +77,20 @@ public class TrackerInfo
         }
     }
 
-    public static Set getPeers(InputStream in, byte[] my_id, MetaInfo metainfo)
-            throws IOException
+    public static Set getPeers (InputStream in, byte[] my_id, MetaInfo metainfo)
+        throws IOException
     {
         return getPeers(new BDecoder(in), my_id, metainfo);
     }
 
-    public static Set getPeers(BDecoder be, byte[] my_id, MetaInfo metainfo)
-            throws IOException
+    public static Set getPeers (BDecoder be, byte[] my_id, MetaInfo metainfo)
+        throws IOException
     {
         return getPeers(be.bdecodeList().getList(), my_id, metainfo);
     }
 
-    public static Set<Peer> getPeers(List l, byte[] my_id, MetaInfo metainfo)
-            throws IOException
+    public static Set<Peer> getPeers (List l, byte[] my_id, MetaInfo metainfo)
+        throws IOException
     {
         Set<Peer> peers = new HashSet<Peer>(l.size());
 
@@ -103,29 +103,29 @@ public class TrackerInfo
         return peers;
     }
 
-    public Set getPeers()
+    public Set getPeers ()
     {
         return peers;
     }
 
-    public String getFailureReason()
+    public String getFailureReason ()
     {
         return failure_reason;
     }
 
-    public int getInterval()
+    public int getInterval ()
     {
         return interval;
     }
 
     @Override
-    public String toString()
+    public String toString ()
     {
         if (failure_reason != null) {
             return "TrackerInfo[FAILED: " + failure_reason + "]";
         } else {
             return "TrackerInfo[interval=" + interval + ", peers=" + peers
-                    + "]";
+                + "]";
         }
     }
 }

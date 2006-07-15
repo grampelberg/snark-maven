@@ -20,28 +20,25 @@ import org.klomp.snark.StorageListener;
 
 public class SnarkApplication
 {
-    protected static final String newline =
-        System.getProperty("line.separator");
+    protected static final String newline = System.getProperty("line.separator");
 
-    protected static final String copyright =
-        "The Hunting of the Snark Project - " +
-        "Copyright (C) 2003 Mark J. Wielaard, (c) 2006 Three Rings Design" +
-        newline +
-        newline +
-        "Snark comes with ABSOLUTELY NO WARRANTY.  This is free software, and" +
-        newline +
-        "you are welcome to redistribute it under certain conditions; read the" +
-        newline + "COPYING file for details.";
+    protected static final String copyright = "The Hunting of the Snark Project - "
+        + "Copyright (C) 2003 Mark J. Wielaard, (c) 2006 Three Rings Design"
+        + newline
+        + newline
+        + "Snark comes with ABSOLUTELY NO WARRANTY.  This is free software, and"
+        + newline
+        + "you are welcome to redistribute it under certain conditions; read the"
+        + newline + "COPYING file for details.";
 
-    protected  static final String usage =
-        "Press return for help. Type \"quit\" and return to stop.";
+    protected static final String usage = "Press return for help. Type \"quit\" and return to stop.";
 
     protected static final String help = "Commands: 'info', 'list', 'quit'.";
 
     /**
      * A basic command line interface to the Snark library.
      */
-    public static void main(String[] args)
+    public static void main (String[] args)
     {
         System.out.println(copyright);
         System.out.println();
@@ -54,13 +51,13 @@ public class SnarkApplication
                 interactive = false;
             }
         }
-;
+        ;
         snark.setupNetwork();
         snark.collectPieces();
 
         ShutdownListener listener = new ShutdownListener() {
             // documentation inherited from interface ShutdownListener
-            public void shutdown()
+            public void shutdown ()
             {
                 // Should not be necessary since all non-deamon threads should
                 // have died. But in reality this does not always happen.
@@ -68,14 +65,13 @@ public class SnarkApplication
             }
         };
         SnarkShutdown hook = new SnarkShutdown(snark.storage,
-                snark.coordinator, snark.acceptor, snark.trackerclient,
-                listener);
+            snark.coordinator, snark.acceptor, snark.trackerclient, listener);
         Runtime.getRuntime().addShutdownHook(hook);
 
         Timer timer = new Timer(true);
         TimerTask monitor = new PeerMonitorTask(snark.coordinator);
         timer.schedule(monitor, PeerMonitorTask.MONITOR_PERIOD,
-                PeerMonitorTask.MONITOR_PERIOD);
+            PeerMonitorTask.MONITOR_PERIOD);
 
         // Start command interpreter
         if (interactive) {
@@ -96,7 +92,7 @@ public class SnarkApplication
 
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(
-                    System.in));
+                System.in));
             String line = br.readLine();
             while (!quit && line != null) {
                 line = line.toLowerCase();
@@ -105,34 +101,29 @@ public class SnarkApplication
                 } else if ("list".equals(line)) {
                     synchronized (snark.coordinator.peers) {
                         System.out.println(snark.coordinator.peers.size()
-                                + " peers -" + " (i)nterested,"
-                                + " (I)nteresting," + " (c)hoking,"
-                                + " (C)hoked:");
+                            + " peers -" + " (i)nterested," + " (I)nteresting,"
+                            + " (c)hoking," + " (C)hoked:");
                         Iterator it = snark.coordinator.peers.iterator();
                         while (it.hasNext()) {
                             Peer peer = (Peer)it.next();
                             System.out.println(peer);
-                            System.out.println("\ti: "
-                                    + peer.isInterested() + " I: "
-                                    + peer.isInteresting() + " c: "
-                                    + peer.isChoking() + " C: "
-                                    + peer.isChoked());
+                            System.out.println("\ti: " + peer.isInterested()
+                                + " I: " + peer.isInteresting() + " c: "
+                                + peer.isChoking() + " C: " + peer.isChoked());
                         }
                     }
                 } else if ("info".equals(line)) {
                     System.out.println("Name: " + snark.meta.getName());
                     System.out.println("Torrent: " + snark.torrent);
-                    System.out.println("Tracker: "
-                            + snark.meta.getAnnounce());
+                    System.out.println("Tracker: " + snark.meta.getAnnounce());
                     List files = snark.meta.getFiles();
                     System.out.println("Files: "
-                            + ((files == null) ? 1 : files.size()));
+                        + ((files == null) ? 1 : files.size()));
                     System.out.println("Pieces: " + snark.meta.getPieces());
                     System.out.println("Piece size: "
-                            + snark.meta.getPieceLength(0) / 1024 + " KB");
+                        + snark.meta.getPieceLength(0) / 1024 + " KB");
                     System.out.println("Total size: "
-                            + snark.meta.getTotalLength() / (1024 * 1024)
-                            + " MB");
+                        + snark.meta.getTotalLength() / (1024 * 1024) + " MB");
                 } else if ("".equals(line) || "help".equals(line)) {
                     System.out.println(usage);
                     System.out.println(help);
@@ -158,36 +149,27 @@ public class SnarkApplication
     /**
      * Prints messages about proper usage of the Snark application.
      */
-    protected static void usage(String s)
+    protected static void usage (String s)
     {
         if (s != null) {
             System.out.println("snark: " + s);
         }
-        System.out
-                .println("Usage: snark [--debug [level]] [--no-commands] [--port <port>]");
-        System.out
-                .println("             [--share (<ip>|<host>)] (<url>|<file>|<dir>)");
+        System.out.println("Usage: snark [--debug [level]] [--no-commands] [--port <port>]");
+        System.out.println("             [--share (<ip>|<host>)] (<url>|<file>|<dir>)");
         System.out.println("  --debug\tShows some extra info and stacktraces");
         System.out.println("    level\tHow much debug details to show");
         System.out.println("         \t(defaults to " + Level.SEVERE
-                + ", with --debug to " + Level.INFO + ", highest level is " + Level.ALL
-                + ").");
-        System.out
-                .println("  --no-commands\tDon't read interactive commands or show usage info.");
-        System.out
-                .println("  --port\tThe port to listen on for incomming connections");
-        System.out
-                .println("        \t(if not given defaults to first free port between "
-                        + Snark.MIN_PORT + "-" + Snark.MAX_PORT + ").");
-        System.out
-                .println("  --share\tStart torrent tracker on <ip> address or <host> name.");
-        System.out
-                .println("  <url>  \tURL pointing to .torrent metainfo file to download/share.");
-        System.out
-                .println("  <file> \tEither a local .torrent metainfo file to download");
+            + ", with --debug to " + Level.INFO + ", highest level is "
+            + Level.ALL + ").");
+        System.out.println("  --no-commands\tDon't read interactive commands or show usage info.");
+        System.out.println("  --port\tThe port to listen on for incomming connections");
+        System.out.println("        \t(if not given defaults to first free port between "
+            + Snark.MIN_PORT + "-" + Snark.MAX_PORT + ").");
+        System.out.println("  --share\tStart torrent tracker on <ip> address or <host> name.");
+        System.out.println("  <url>  \tURL pointing to .torrent metainfo file to download/share.");
+        System.out.println("  <file> \tEither a local .torrent metainfo file to download");
         System.out.println("         \tor (with --share) a file to share.");
-        System.out
-                .println("  <dir>  \tA directory with files to share (needs --share).");
+        System.out.println("  <dir>  \tA directory with files to share (needs --share).");
         System.exit(-1);
     }
 
@@ -195,7 +177,7 @@ public class SnarkApplication
      * A convenience method for parsing arguments passed via the command line
      * where no overriding of the listeners is required.
      */
-    public static Snark parseArguments(String[] args)
+    public static Snark parseArguments (String[] args)
     {
         return parseArguments(args, null, null);
     }
@@ -205,8 +187,8 @@ public class SnarkApplication
      * usage(), which terminates the program, if non-valid argument list. The
      * given listeners will be passed to all components that take one.
      */
-    public static Snark parseArguments(String[] args,
-            StorageListener slistener, CoordinatorListener clistener)
+    public static Snark parseArguments (String[] args,
+        StorageListener slistener, CoordinatorListener clistener)
     {
         int user_port = -1;
         String ip = null;
@@ -268,6 +250,5 @@ public class SnarkApplication
     }
 
     /** The Java logger used to process our log events. */
-    protected static final Logger log =
-        Logger.getLogger("org.klomp.snark.cmd");
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.cmd");
 }

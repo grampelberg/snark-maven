@@ -33,7 +33,7 @@ import java.util.Set;
 public class BEncoder
 {
 
-    public static byte[] bencode(Object o) throws IllegalArgumentException
+    public static byte[] bencode (Object o) throws IllegalArgumentException
     {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -44,8 +44,8 @@ public class BEncoder
         }
     }
 
-    public static void bencode(Object o, OutputStream out) throws IOException,
-            IllegalArgumentException
+    public static void bencode (Object o, OutputStream out) throws IOException,
+        IllegalArgumentException
     {
         if (o instanceof String) {
             bencode((String)o, out);
@@ -59,11 +59,11 @@ public class BEncoder
             bencode((Map<String, Object>)o, out);
         } else {
             throw new IllegalArgumentException("Cannot bencode: "
-                    + o.getClass());
+                + o.getClass());
         }
     }
 
-    public static byte[] bencode(String s)
+    public static byte[] bencode (String s)
     {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -74,13 +74,13 @@ public class BEncoder
         }
     }
 
-    public static void bencode(String s, OutputStream out) throws IOException
+    public static void bencode (String s, OutputStream out) throws IOException
     {
         byte[] bs = s.getBytes("UTF-8");
         bencode(bs, out);
     }
 
-    public static byte[] bencode(Number n)
+    public static byte[] bencode (Number n)
     {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -91,7 +91,7 @@ public class BEncoder
         }
     }
 
-    public static void bencode(Number n, OutputStream out) throws IOException
+    public static void bencode (Number n, OutputStream out) throws IOException
     {
         out.write('i');
         String s = n.toString();
@@ -99,7 +99,7 @@ public class BEncoder
         out.write('e');
     }
 
-    public static byte[] bencode(List l)
+    public static byte[] bencode (List l)
     {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -110,7 +110,7 @@ public class BEncoder
         }
     }
 
-    public static void bencode(List l, OutputStream out) throws IOException
+    public static void bencode (List l, OutputStream out) throws IOException
     {
         out.write('l');
         Iterator it = l.iterator();
@@ -120,7 +120,7 @@ public class BEncoder
         out.write('e');
     }
 
-    public static byte[] bencode(byte[] bs)
+    public static byte[] bencode (byte[] bs)
     {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -131,7 +131,7 @@ public class BEncoder
         }
     }
 
-    public static void bencode(byte[] bs, OutputStream out) throws IOException
+    public static void bencode (byte[] bs, OutputStream out) throws IOException
     {
         String l = Integer.toString(bs.length);
         out.write(l.getBytes("UTF-8"));
@@ -139,7 +139,7 @@ public class BEncoder
         out.write(bs);
     }
 
-    public static byte[] bencode(Map<String, Object> m)
+    public static byte[] bencode (Map<String, Object> m)
     {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -150,8 +150,8 @@ public class BEncoder
         }
     }
 
-    public static void bencode(Map<String, Object> m, OutputStream out)
-            throws IOException
+    public static void bencode (Map<String, Object> m, OutputStream out)
+        throws IOException
     {
         out.write('d');
 

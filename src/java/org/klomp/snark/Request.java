@@ -45,7 +45,7 @@ class Request
      * @param len
      *            the number of bytes requested.
      */
-    Request(int piece, byte[] bs, int off, int len)
+    Request (int piece, byte[] bs, int off, int len)
     {
         this.piece = piece;
         this.bs = bs;
@@ -59,13 +59,13 @@ class Request
     }
 
     @Override
-    public int hashCode()
+    public int hashCode ()
     {
         return piece ^ off ^ len;
     }
 
     @Override
-    public boolean equals(Object o)
+    public boolean equals (Object o)
     {
         if (o instanceof Request) {
             Request req = (Request)o;
@@ -76,7 +76,7 @@ class Request
     }
 
     @Override
-    public String toString()
+    public String toString ()
     {
         return "(" + piece + "," + off + "," + len + ")";
     }

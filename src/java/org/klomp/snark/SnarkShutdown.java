@@ -39,9 +39,9 @@ public class SnarkShutdown extends Thread
 
     private final ShutdownListener listener;
 
-    public SnarkShutdown(Storage storage, PeerCoordinator coordinator,
-            ConnectionAcceptor acceptor, TrackerClient trackerclient,
-            ShutdownListener listener)
+    public SnarkShutdown (Storage storage, PeerCoordinator coordinator,
+        ConnectionAcceptor acceptor, TrackerClient trackerclient,
+        ShutdownListener listener)
     {
         this.storage = storage;
         this.coordinator = coordinator;
@@ -51,7 +51,7 @@ public class SnarkShutdown extends Thread
     }
 
     @Override
-    public void run()
+    public void run ()
     {
         log.log(Level.INFO, "Shutting down...");
 
@@ -90,6 +90,5 @@ public class SnarkShutdown extends Thread
     }
 
     /** The Java logger used to process our log events. */
-    protected static final Logger log =
-        Logger.getLogger("org.klomp.snark.server");
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.server");
 }

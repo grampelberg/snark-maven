@@ -39,7 +39,7 @@ public class PeerID implements Comparable
 
     private final int hash;
 
-    public PeerID(byte[] id, InetAddress address, int port)
+    public PeerID (byte[] id, InetAddress address, int port)
     {
         this.id = id;
         this.address = address;
@@ -51,7 +51,7 @@ public class PeerID implements Comparable
     /**
      * Creates a PeerID from a BDecoder.
      */
-    public PeerID(BDecoder be) throws IOException
+    public PeerID (BDecoder be) throws IOException
     {
         this(be.bdecodeMap().getMap());
     }
@@ -59,7 +59,8 @@ public class PeerID implements Comparable
     /**
      * Creates a PeerID from a Map containing BEncoded peer id, ip and port.
      */
-    public PeerID(Map m) throws InvalidBEncodingException, UnknownHostException
+    public PeerID (Map m)
+        throws InvalidBEncodingException, UnknownHostException
     {
         BEValue bevalue = (BEValue)m.get("peer id");
         if (bevalue == null) {
@@ -82,22 +83,22 @@ public class PeerID implements Comparable
         hash = calculateHash();
     }
 
-    public byte[] getID()
+    public byte[] getID ()
     {
         return id;
     }
 
-    public InetAddress getAddress()
+    public InetAddress getAddress ()
     {
         return address;
     }
 
-    public int getPort()
+    public int getPort ()
     {
         return port;
     }
 
-    private int calculateHash()
+    private int calculateHash ()
     {
         int b = 0;
         for (byte element : id) {
@@ -110,7 +111,7 @@ public class PeerID implements Comparable
      * The hash code of a PeerID is the exclusive or of all id bytes.
      */
     @Override
-    public int hashCode()
+    public int hashCode ()
     {
         return hash;
     }
@@ -119,7 +120,7 @@ public class PeerID implements Comparable
      * Returns true if and only if this peerID and the given peerID have the
      * same 20 bytes as ID.
      */
-    public boolean sameID(PeerID pid)
+    public boolean sameID (PeerID pid)
     {
         boolean equal = true;
         for (int i = 0; equal && i < id.length; i++) {
@@ -132,13 +133,13 @@ public class PeerID implements Comparable
      * Two PeerIDs are equal when they have the same id, address and port.
      */
     @Override
-    public boolean equals(Object o)
+    public boolean equals (Object o)
     {
         if (o instanceof PeerID) {
             PeerID pid = (PeerID)o;
 
             return port == pid.port && address.equals(pid.address)
-                    && sameID(pid);
+                && sameID(pid);
         } else {
             return false;
         }
@@ -147,7 +148,7 @@ public class PeerID implements Comparable
     /**
      * Compares port, address and id.
      */
-    public int compareTo(Object o)
+    public int compareTo (Object o)
     {
         PeerID pid = (PeerID)o;
 
@@ -176,7 +177,7 @@ public class PeerID implements Comparable
      * leading zeros removed.
      */
     @Override
-    public String toString()
+    public String toString ()
     {
         return idencode(id) + "@" + address + ":" + port;
     }
@@ -184,7 +185,7 @@ public class PeerID implements Comparable
     /**
      * Encode an id as a hex encoded string and remove leading zeros.
      */
-    public static String idencode(byte[] bs)
+    public static String idencode (byte[] bs)
     {
         boolean leading_zeros = true;
 

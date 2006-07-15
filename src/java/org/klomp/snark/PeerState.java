@@ -70,8 +70,8 @@ class PeerState
 
     private final static int PARTSIZE = 16384; // 16K
 
-    PeerState(Peer peer, PeerListener listener, MetaInfo metainfo,
-            PeerConnectionIn in, PeerConnectionOut out)
+    PeerState (Peer peer, PeerListener listener, MetaInfo metainfo,
+        PeerConnectionIn in, PeerConnectionOut out)
     {
         this.peer = peer;
         this.listener = listener;
@@ -83,13 +83,13 @@ class PeerState
 
     // NOTE Methods that inspect or change the state synchronize (on this).
 
-    void keepAliveMessage()
+    void keepAliveMessage ()
     {
         log.log(Level.FINEST, peer + " rcv alive");
         /* XXX - ignored */
     }
 
-    void chokeMessage(boolean choke)
+    void chokeMessage (boolean choke)
     {
         log.log(Level.FINEST, peer + " rcv " + (choke ? "" : "un") + "choked");
 
@@ -105,22 +105,22 @@ class PeerState
         }
     }
 
-    void interestedMessage(boolean interest)
+    void interestedMessage (boolean interest)
     {
-        log.log(Level.FINEST, peer + " rcv " + (interest ? "" : "un") +
-            "interested");
+        log.log(Level.FINEST, peer + " rcv " + (interest ? "" : "un")
+            + "interested");
         interested = interest;
         listener.gotInterest(peer, interest);
     }
 
-    void haveMessage(int piece)
+    void haveMessage (int piece)
     {
         log.log(Level.FINEST, peer + " rcv have(" + piece + ")");
         // Sanity check
         if (piece < 0 || piece >= metainfo.getPieces()) {
             // XXX disconnect?
-            log.log(Level.FINER, "Got strange 'have: " + piece +
-                "' message from " + peer);
+            log.log(Level.FINER, "Got strange 'have: " + piece
+                + "' message from " + peer);
             return;
         }
 
@@ -138,14 +138,14 @@ class PeerState
         }
     }
 
-    void bitfieldMessage(byte[] bitmap)
+    void bitfieldMessage (byte[] bitmap)
     {
         synchronized (this) {
             log.log(Level.FINEST, peer + " rcv bitfield");
             if (bitfield != null) {
                 // XXX - Be liberal in what you accept?
-                log.log(Level.FINER, "Got unexpected bitfield message from " +
-                    peer);
+                log.log(Level.FINER, "Got unexpected bitfield message from "
+                    + peer);
                 return;
             }
 
@@ -155,10 +155,10 @@ class PeerState
         setInteresting(listener.gotBitField(peer, bitfield));
     }
 
-    void requestMessage(int piece, int begin, int length)
+    void requestMessage (int piece, int begin, int length)
     {
-            log.log(Level.FINEST, peer + " rcv request(" + piece + ", " +
-                begin + ", " + length + ") ");
+        log.log(Level.FINEST, peer + " rcv request(" + piece + ", " + begin
+            + ", " + length + ") ");
         if (choking) {
             log.log(Level.FINER, "Request received, but choking " + peer);
             return;
@@ -166,11 +166,11 @@ class PeerState
 
         // Sanity check
         if (piece < 0 || piece >= metainfo.getPieces() || begin < 0
-                || begin > metainfo.getPieceLength(piece) || length <= 0
-                || length > 4 * PARTSIZE) {
+            || begin > metainfo.getPieceLength(piece) || length <= 0
+            || length > 4 * PARTSIZE) {
             // XXX - Protocol error -> disconnect?
-            log.log(Level.FINER, "Got strange 'request: " + piece + ", " +
-                begin + ", " + length + "' message from " + peer);
+            log.log(Level.FINER, "Got strange 'request: " + piece + ", "
+                + begin + ", " + length + "' message from " + peer);
             return;
         }
 
@@ -189,8 +189,8 @@ class PeerState
             return;
         }
 
-            log.log(Level.FINEST, "Sending (" + piece + ", " +
-                begin + ", " + length + ")" + " to " + peer);
+        log.log(Level.FINEST, "Sending (" + piece + ", " + begin + ", "
+            + length + ")" + " to " + peer);
         out.sendPiece(piece, begin, length, pieceBytes);
 
         // Tell about last subpiece delivery.
@@ -203,7 +203,7 @@ class PeerState
      * Called when some bytes have left the outgoing connection. XXX - Should
      * indicate whether it was a real piece or overhead.
      */
-    void uploaded(int size)
+    void uploaded (int size)
     {
         uploaded += size;
         listener.uploaded(peer, size);
@@ -212,7 +212,7 @@ class PeerState
     /**
      * Called when a partial piece request has been handled by PeerConnectionIn.
      */
-    void pieceMessage(Request req)
+    void pieceMessage (Request req)
     {
         int size = req.len;
         downloaded += size;
@@ -230,7 +230,7 @@ class PeerState
         }
     }
 
-    synchronized private int getFirstOutstandingRequest(int piece)
+    synchronized private int getFirstOutstandingRequest (int piece)
     {
         for (int i = 0; i < outstandingRequests.size(); i++) {
             if ((outstandingRequests.get(i)).piece == piece) {
@@ -245,10 +245,10 @@ class PeerState
      * connection. Returns null when there was no such request. It also
      * requeues/sends requests when it thinks that they must have been lost.
      */
-    Request getOutstandingRequest(int piece, int begin, int length)
+    Request getOutstandingRequest (int piece, int begin, int length)
     {
-        log.log(Level.FINEST, "getChunk(" + piece + "," + begin +
-            "," + length + ") " + peer);
+        log.log(Level.FINEST, "getChunk(" + piece + "," + begin + "," + length
+            + ") " + peer);
 
         int r = getFirstOutstandingRequest(piece);
 
@@ -265,7 +265,7 @@ class PeerState
         synchronized (this) {
             req = outstandingRequests.get(r);
             while (req.piece == piece && req.off != begin
-                    && r < outstandingRequests.size() - 1) {
+                && r < outstandingRequests.size() - 1) {
                 r++;
                 req = outstandingRequests.get(r);
             }
@@ -273,8 +273,7 @@ class PeerState
             // Something wrong?
             if (req.piece != piece || req.off != begin || req.len != length) {
                 log.log(Level.FINER, "Unrequested or unneeded 'piece: " + piece
-                    + ", " + begin + ", " + length + "' received from "
-                    + peer);
+                    + ", " + begin + ", " + length + "' received from " + peer);
                 downloaded = 0; // XXX - punishment?
                 return null;
             }
@@ -282,11 +281,9 @@ class PeerState
             // Report missing requests.
             if (r != 0) {
                 String errmsg = "";
-                boolean logMissing =
-                    (log.getLevel().intValue() <= Level.FINER.intValue());
+                boolean logMissing = (log.getLevel().intValue() <= Level.FINER.intValue());
                 if (logMissing) {
-                    errmsg = "Some requests dropped, got " + req
-                            + ", wanted:";
+                    errmsg = "Some requests dropped, got " + req + ", wanted:";
                 }
                 for (int i = 0; i < r; i++) {
                     Request dropReq = outstandingRequests.remove(0);
@@ -317,20 +314,20 @@ class PeerState
 
     }
 
-    void cancelMessage(int piece, int begin, int length)
+    void cancelMessage (int piece, int begin, int length)
     {
-        log.log(Level.FINEST, "Got cancel message (" + piece + ", " +
-            begin + ", " + length + ")");
+        log.log(Level.FINEST, "Got cancel message (" + piece + ", " + begin
+            + ", " + length + ")");
         out.cancelRequest(piece, begin, length);
     }
 
-    void unknownMessage(int type, byte[] bs)
+    void unknownMessage (int type, byte[] bs)
     {
         log.log(Level.WARNING, "Ignoring unknown message type: " + type
             + " length: " + bs.length);
     }
 
-    void havePiece(int piece)
+    void havePiece (int piece)
     {
         log.log(Level.FINEST, "Tell " + peer + " havePiece(" + piece + ")");
 
@@ -369,7 +366,7 @@ class PeerState
     }
 
     // Starts or resumes requesting pieces.
-    private void request()
+    private void request ()
     {
         // Are there outstanding requests that have to be resend?
         if (resend) {
@@ -384,7 +381,7 @@ class PeerState
     /**
      * Adds a new request to the outstanding requests list.
      */
-    private void addRequest()
+    private void addRequest ()
     {
         boolean more_pieces = true;
         while (more_pieces) {
@@ -414,9 +411,9 @@ class PeerState
                         byte[] bs = lastRequest.bs;
                         int maxLength = pieceLength - nextBegin;
                         int nextLength = maxLength > PARTSIZE ? PARTSIZE
-                                : maxLength;
+                            : maxLength;
                         Request req = new Request(nextPiece, bs, nextBegin,
-                                nextLength);
+                            nextLength);
                         outstandingRequests.add(req);
                         if (!choked) {
                             out.sendRequest(req);
@@ -432,7 +429,7 @@ class PeerState
 
     // Starts requesting first chunk of next piece. Returns true if
     // something has been added to the requests, false otherwise.
-    private boolean requestNextPiece()
+    private boolean requestNextPiece ()
     {
         // Check that we already know what the other side has.
         if (bitfield != null) {
@@ -440,7 +437,7 @@ class PeerState
             log.log(Level.FINEST, peer + " want piece " + nextPiece);
             synchronized (this) {
                 if (nextPiece != -1
-                        && (lastRequest == null || lastRequest.piece != nextPiece)) {
+                    && (lastRequest == null || lastRequest.piece != nextPiece)) {
                     int piece_length = metainfo.getPieceLength(nextPiece);
                     byte[] bs = new byte[piece_length];
 
@@ -459,7 +456,7 @@ class PeerState
         return false;
     }
 
-    synchronized void setInteresting(boolean interest)
+    synchronized void setInteresting (boolean interest)
     {
         log.log(Level.FINEST, peer + " setInteresting(" + interest + ")");
 
@@ -473,7 +470,7 @@ class PeerState
         }
     }
 
-    synchronized void setChoking(boolean choke)
+    synchronized void setChoking (boolean choke)
     {
         log.log(Level.FINEST, peer + " setChoking(" + choke + ")");
 
@@ -484,6 +481,5 @@ class PeerState
     }
 
     /** The Java logger used to process our log events. */
-    protected static final Logger log =
-        Logger.getLogger("org.klomp.snark.peer");
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.peer");
 }

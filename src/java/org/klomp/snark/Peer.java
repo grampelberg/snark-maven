@@ -55,8 +55,8 @@ public class Peer implements Comparable<Peer>
      * Creates a disconnected peer given a PeerID, your own id and the relevant
      * MetaInfo.
      */
-    public Peer(PeerID peerID, byte[] my_id, MetaInfo metainfo)
-            throws IOException
+    public Peer (PeerID peerID, byte[] my_id, MetaInfo metainfo)
+        throws IOException
     {
         this.peerID = peerID;
         this.my_id = my_id;
@@ -72,9 +72,9 @@ public class Peer implements Comparable<Peer>
      * @exception IOException
      *                when an error occurred during the handshake.
      */
-    public Peer(final Socket sock, BufferedInputStream bis,
-            BufferedOutputStream bos, byte[] my_id, MetaInfo metainfo)
-            throws IOException
+    public Peer (final Socket sock, BufferedInputStream bis,
+        BufferedOutputStream bos, byte[] my_id, MetaInfo metainfo)
+        throws IOException
     {
         this.my_id = my_id;
         this.metainfo = metainfo;
@@ -86,7 +86,7 @@ public class Peer implements Comparable<Peer>
     /**
      * Returns the id of the peer.
      */
-    public PeerID getPeerID()
+    public PeerID getPeerID ()
     {
         return peerID;
     }
@@ -95,7 +95,7 @@ public class Peer implements Comparable<Peer>
      * Returns the String representation of the peerID.
      */
     @Override
-    public String toString()
+    public String toString ()
     {
         return peerID.toString();
     }
@@ -104,7 +104,7 @@ public class Peer implements Comparable<Peer>
      * The hash code of a Peer is the hash code of the peerID.
      */
     @Override
-    public int hashCode()
+    public int hashCode ()
     {
         return peerID.hashCode();
     }
@@ -114,7 +114,7 @@ public class Peer implements Comparable<Peer>
      * are ignored.
      */
     @Override
-    public boolean equals(Object o)
+    public boolean equals (Object o)
     {
         if (o instanceof Peer) {
             Peer p = (Peer)o;
@@ -127,7 +127,7 @@ public class Peer implements Comparable<Peer>
     /**
      * Compares the PeerIDs.
      */
-    public int compareTo(Peer p)
+    public int compareTo (Peer p)
     {
         return peerID.compareTo(p.peerID);
     }
@@ -143,7 +143,7 @@ public class Peer implements Comparable<Peer>
      * If the given BitField is non-null it is send to the peer as first
      * message.
      */
-    public void runConnection(PeerListener listener, BitField bitfield)
+    public void runConnection (PeerListener listener, BitField bitfield)
     {
         if (state != null) {
             throw new IllegalStateException("Peer already started");
@@ -153,16 +153,16 @@ public class Peer implements Comparable<Peer>
             // Do we need to handshake?
             if (din == null) {
                 Socket sock = new Socket(peerID.getAddress(), peerID.getPort());
-                BufferedInputStream bis = new BufferedInputStream(sock
-                        .getInputStream());
-                BufferedOutputStream bos = new BufferedOutputStream(sock
-                        .getOutputStream());
+                BufferedInputStream bis = new BufferedInputStream(
+                    sock.getInputStream());
+                BufferedOutputStream bos = new BufferedOutputStream(
+                    sock.getOutputStream());
                 byte[] id = handshake(bis, bos);
                 byte[] expected_id = peerID.getID();
                 if (!Arrays.equals(expected_id, id)) {
                     throw new IOException("Unexpected peerID '"
-                            + PeerID.idencode(id) + "' expected '"
-                            + PeerID.idencode(expected_id) + "'");
+                        + PeerID.idencode(id) + "' expected '"
+                        + PeerID.idencode(expected_id) + "'");
                 }
             }
 
@@ -199,8 +199,8 @@ public class Peer implements Comparable<Peer>
      * Sets DataIn/OutputStreams, does the handshake and returns the id reported
      * by the other side.
      */
-    private byte[] handshake(BufferedInputStream bis, BufferedOutputStream bos)
-            throws IOException
+    private byte[] handshake (BufferedInputStream bis, BufferedOutputStream bos)
+        throws IOException
     {
         din = new DataInputStream(bis);
         dout = new DataOutputStream(bos);
@@ -222,7 +222,7 @@ public class Peer implements Comparable<Peer>
         byte b = din.readByte();
         if (b != 19) {
             throw new IOException("Handshake failure, expected 19, got "
-                    + (b & 0xff));
+                + (b & 0xff));
         }
 
         byte[] bs = new byte[19];
@@ -230,7 +230,7 @@ public class Peer implements Comparable<Peer>
         String bittorrentProtocol = new String(bs, "UTF-8");
         if (!"BitTorrent protocol".equals(bittorrentProtocol)) {
             throw new IOException("Handshake failure, expected "
-                    + "'Bittorrent protocol', got '" + bittorrentProtocol + "'");
+                + "'Bittorrent protocol', got '" + bittorrentProtocol + "'");
         }
 
         // Handshake read - zeros
@@ -248,7 +248,7 @@ public class Peer implements Comparable<Peer>
         return bs;
     }
 
-    public boolean isConnected()
+    public boolean isConnected ()
     {
         return state != null;
     }
@@ -258,14 +258,14 @@ public class Peer implements Comparable<Peer>
      * PeerListener.disconnected() will be called when the connection is
      * completely terminated. Otherwise the connection is silently terminated.
      */
-    public void disconnect(boolean deregister)
+    public void disconnect (boolean deregister)
     {
         // Both in and out connection will call this.
         this.deregister = deregister;
         disconnect();
     }
 
-    void disconnect()
+    void disconnect ()
     {
         PeerState s = state;
         if (s != null) {
@@ -285,7 +285,7 @@ public class Peer implements Comparable<Peer>
     /**
      * Tell the peer we have another piece.
      */
-    public void have(int piece)
+    public void have (int piece)
     {
         PeerState s = state;
         if (s != null) {
@@ -297,7 +297,7 @@ public class Peer implements Comparable<Peer>
      * Whether or not the peer is interested in pieces we have. Returns false if
      * not connected.
      */
-    public boolean isInterested()
+    public boolean isInterested ()
     {
         PeerState s = state;
         return (s != null) && s.interested;
@@ -308,7 +308,7 @@ public class Peer implements Comparable<Peer>
      * to false. When interest is true and this peer unchokes us then we start
      * downloading from it. Has no effect when not connected.
      */
-    public void setInteresting(boolean interest)
+    public void setInteresting (boolean interest)
     {
         PeerState s = state;
         if (s != null) {
@@ -320,7 +320,7 @@ public class Peer implements Comparable<Peer>
      * Whether or not the peer has pieces we want from it. Returns false if not
      * connected.
      */
-    public boolean isInteresting()
+    public boolean isInteresting ()
     {
         PeerState s = state;
         return (s != null) && s.interesting;
@@ -331,7 +331,7 @@ public class Peer implements Comparable<Peer>
      * is false and the peer requests some pieces we upload them, otherwise
      * requests of this peer are ignored.
      */
-    public void setChoking(boolean choke)
+    public void setChoking (boolean choke)
     {
         PeerState s = state;
         if (s != null) {
@@ -342,7 +342,7 @@ public class Peer implements Comparable<Peer>
     /**
      * Whether or not we are choking the peer. Returns true when not connected.
      */
-    public boolean isChoking()
+    public boolean isChoking ()
     {
         PeerState s = state;
         return (s == null) || s.choking;
@@ -351,7 +351,7 @@ public class Peer implements Comparable<Peer>
     /**
      * Whether or not the peer choked us. Returns true when not connected.
      */
-    public boolean isChoked()
+    public boolean isChoked ()
     {
         PeerState s = state;
         return (s == null) || s.choked;
@@ -361,7 +361,7 @@ public class Peer implements Comparable<Peer>
      * Returns the number of bytes that have been downloaded. Can be reset to
      * zero with <code>resetCounters()</code>/
      */
-    public long getDownloaded()
+    public long getDownloaded ()
     {
         PeerState s = state;
         return (s != null) ? s.downloaded : 0;
@@ -371,7 +371,7 @@ public class Peer implements Comparable<Peer>
      * Returns the number of bytes that have been uploaded. Can be reset to zero
      * with <code>resetCounters()</code>/
      */
-    public long getUploaded()
+    public long getUploaded ()
     {
         PeerState s = state;
         return (s != null) ? s.uploaded : 0;
@@ -380,7 +380,7 @@ public class Peer implements Comparable<Peer>
     /**
      * Resets the downloaded and uploaded counters to zero.
      */
-    public void resetCounters()
+    public void resetCounters ()
     {
         PeerState s = state;
         if (s != null) {
@@ -390,6 +390,5 @@ public class Peer implements Comparable<Peer>
     }
 
     /** The Java logger used to process our log events. */
-    protected static final Logger log =
-        Logger.getLogger("org.klomp.snark.peer");
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.peer");
 }

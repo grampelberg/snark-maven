@@ -39,13 +39,13 @@ public class PeerMonitorTask extends TimerTask
 
     private long lastUploaded = 0;
 
-    public PeerMonitorTask(PeerCoordinator coordinator)
+    public PeerMonitorTask (PeerCoordinator coordinator)
     {
         this.coordinator = coordinator;
     }
 
     @Override
-    public void run()
+    public void run ()
     {
         // Get some statistics
         int peers = 0;
@@ -107,19 +107,19 @@ public class PeerMonitorTask extends TimerTask
 
         int needP = coordinator.storage.needed();
         long needMB = needP * coordinator.metainfo.getPieceLength(0)
-                / (1024 * 1024);
+            / (1024 * 1024);
         int totalP = coordinator.metainfo.getPieces();
         long totalMB = coordinator.metainfo.getTotalLength() / (1024 * 1024);
 
         System.out.println();
         System.out.println("Down: " + (downloaded - lastDownloaded)
-                / KILOPERSECOND + "KB/s" + " (" + totalDown + ")" + " Up: "
-                + (uploaded - lastUploaded) / KILOPERSECOND + "KB/s" + " ("
-                + totalUp + ")" + " Need " + needP + " (" + needMB + "MB)"
-                + " of " + totalP + " (" + totalMB + "MB)" + " pieces");
+            / KILOPERSECOND + "KB/s" + " (" + totalDown + ")" + " Up: "
+            + (uploaded - lastUploaded) / KILOPERSECOND + "KB/s" + " ("
+            + totalUp + ")" + " Need " + needP + " (" + needMB + "MB)" + " of "
+            + totalP + " (" + totalMB + "MB)" + " pieces");
         System.out.println(peers + ": Download #" + downloaders + " Upload #"
-                + uploaders + " Interested #" + interested + " Interesting #"
-                + interesting + " Choking #" + choking + " Choked #" + choked);
+            + uploaders + " Interested #" + interested + " Interesting #"
+            + interesting + " Choking #" + choking + " Choked #" + choked);
         System.out.println();
 
         lastDownloaded = downloaded;

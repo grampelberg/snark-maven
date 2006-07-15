@@ -52,36 +52,32 @@ import org.klomp.snark.Storage;
 import org.klomp.snark.StorageListener;
 import org.klomp.snark.cmd.SnarkApplication;
 
-
 /**
  * Main Snark program startup class that uses a Gnome UI.
  * 
  * @author Mark Wielaard (mark@klomp.org)
  */
 public class SnarkGnome implements Runnable, StorageListener,
-        CoordinatorListener, ShutdownListener, Fireable, LifeCycleListener,
-        MenuItemListener
+    CoordinatorListener, ShutdownListener, Fireable, LifeCycleListener,
+    MenuItemListener
 {
     private static final String VERSION = "0.6";
 
     private static final String AUTHOR1 = "Mark J. Wielaard <mark@klomp.org>";
-    private static final String AUTHOR2 =
-        "Elizabeth Fong <elizabeth@threerings.net>";
 
-    private static final String COPYING =
-        "Copyright 2003, Mark J. Wielaard, " +
-        "2006 Three Rings Design" +
-        "\n" +
-        "Distributed under the terms of the " +
-        "GNU General Public License (GPL)";
+    private static final String AUTHOR2 = "Elizabeth Fong <elizabeth@threerings.net>";
 
-    private static final String COMMENT =
-        "A BitTorrent client, torrent creator and tracker" +
-        " that makes sharing files with your buddies as easy as possible." +
-        "\n\n" +
-        "Snark comes with ABSOLUTELY NO WARRANTY.  " +
-        "This is free software, and you are welcome to redistribute it " +
-        "under certain conditions; read the COPYING file for details.";
+    private static final String COPYING = "Copyright 2003, Mark J. Wielaard, "
+        + "2006 Three Rings Design" + "\n"
+        + "Distributed under the terms of the "
+        + "GNU General Public License (GPL)";
+
+    private static final String COMMENT = "A BitTorrent client, torrent creator and tracker"
+        + " that makes sharing files with your buddies as easy as possible."
+        + "\n\n"
+        + "Snark comes with ABSOLUTELY NO WARRANTY.  "
+        + "This is free software, and you are welcome to redistribute it "
+        + "under certain conditions; read the COPYING file for details.";
 
     // How often to call the update time which calls fire() per second.
     static int UPDATE_TIMER = 2;
@@ -115,7 +111,7 @@ public class SnarkGnome implements Runnable, StorageListener,
     /**
      * Creates the whole SnarkGnome application.
      */
-    private SnarkGnome()
+    private SnarkGnome ()
     {
         // Main window
         app = new App("snark", "Snark");
@@ -237,10 +233,10 @@ public class SnarkGnome implements Runnable, StorageListener,
     /**
      * Handles Life Cycle events (main application window close or delete).
      */
-    public void lifeCycleEvent(LifeCycleEvent event)
+    public void lifeCycleEvent (LifeCycleEvent event)
     {
         if (event.isOfType(LifeCycleEvent.Type.DELETE)
-                || event.isOfType(LifeCycleEvent.Type.DESTROY)) {
+            || event.isOfType(LifeCycleEvent.Type.DESTROY)) {
             // XXX - Must be set so we don't crash in fire()
             shutdown_now = true;
             quit();
@@ -250,7 +246,7 @@ public class SnarkGnome implements Runnable, StorageListener,
     /**
      * Handles Menu events (quit, about, ...).
      */
-    public void menuItemEvent(MenuItemEvent event)
+    public void menuItemEvent (MenuItemEvent event)
     {
         Object source = event.getSource();
         if (source.equals(propertiesItem)) {
@@ -261,14 +257,14 @@ public class SnarkGnome implements Runnable, StorageListener,
             about();
         } else {
             System.err.println("Unknow event: " + event + " from source: "
-                    + source);
+                + source);
         }
     }
 
     /**
      * Called when the application should quit.
      */
-    private void quit()
+    private void quit ()
     {
         activity = SHUTDOWN;
         if (snarkhook != null) {
@@ -280,7 +276,7 @@ public class SnarkGnome implements Runnable, StorageListener,
     }
 
     // Called by the shutdown hook
-    public void shutdown()
+    public void shutdown ()
     {
         Gtk.mainQuit();
         System.exit(0);
@@ -289,7 +285,7 @@ public class SnarkGnome implements Runnable, StorageListener,
     /**
      * Called when we have to show info about the program.
      */
-    private void about()
+    private void about ()
     {
         String[] authors = { AUTHOR1, AUTHOR2 };
         AboutDialog about = new AboutDialog();
@@ -302,19 +298,19 @@ public class SnarkGnome implements Runnable, StorageListener,
     }
 
     // Creates the actual Snark object. Runs in the background
-    public void run()
+    public void run ()
     {
         _snark = SnarkApplication.parseArguments(args, this, this);
 
         snarkhook = new SnarkShutdown(_snark.storage, _snark.coordinator,
-                _snark.acceptor, _snark.trackerclient, this);
+            _snark.acceptor, _snark.trackerclient, this);
         Runtime.getRuntime().addShutdownHook(snarkhook);
     }
 
     /**
      * Starts snark with a Gnome UI.
      */
-    public static void main(String[] args)
+    public static void main (String[] args)
     {
         // Initialize Gnome libraries and handle common arguments.
         Program.initGnomeUI("Snark", VERSION, args);
@@ -335,18 +331,18 @@ public class SnarkGnome implements Runnable, StorageListener,
     // Change/Check this flag only while holding the lock on this.
     private boolean progress = false;
 
-    private synchronized void progress()
+    private synchronized void progress ()
     {
         progress = true;
     }
 
-    public void peerChange(PeerCoordinator coordinator, Peer peer)
+    public void peerChange (PeerCoordinator coordinator, Peer peer)
     {
         activity = getActivity();
         progress();
     }
 
-    public void storageCreateFile(Storage storage, String name, long length)
+    public void storageCreateFile (Storage storage, String name, long length)
     {
         // We should display something about this...
         activity = ALLOCATING;
@@ -355,7 +351,7 @@ public class SnarkGnome implements Runnable, StorageListener,
     // How much storage space has been allocated
     private long allocated = 0;
 
-    public void storageAllocated(Storage storage, long length)
+    public void storageAllocated (Storage storage, long length)
     {
         activity = ALLOCATING;
         allocated += length;
@@ -370,7 +366,7 @@ public class SnarkGnome implements Runnable, StorageListener,
 
     boolean prechecking = true;
 
-    public void storageChecked(Storage storage, int num, boolean checked)
+    public void storageChecked (Storage storage, int num, boolean checked)
     {
         if (prechecking) {
             activity = CHECKING;
@@ -382,7 +378,7 @@ public class SnarkGnome implements Runnable, StorageListener,
         progress();
     }
 
-    public void storageAllChecked(Storage storage)
+    public void storageAllChecked (Storage storage)
     {
         prechecking = false;
         activity = getActivity();
@@ -392,7 +388,7 @@ public class SnarkGnome implements Runnable, StorageListener,
      * Returns the current activity by checking the storage and peer
      * coordinator.
      */
-    private String getActivity()
+    private String getActivity ()
     {
         String activity;
 
@@ -404,8 +400,7 @@ public class SnarkGnome implements Runnable, StorageListener,
         if (_snark.coordinator != null && _snark.coordinator.peers != null) {
             synchronized (_snark.coordinator.peers) {
                 if (_snark.coordinator.peers.size() > 0
-                        && (_snark.coordinator.getDownloaded() > 0 || _snark.coordinator
-                                .getUploaded() > 0)) {
+                    && (_snark.coordinator.getDownloaded() > 0 || _snark.coordinator.getUploaded() > 0)) {
                     if (_snark.storage != null && _snark.storage.complete()) {
                         activity = SHARING;
                     } else {
@@ -427,7 +422,7 @@ public class SnarkGnome implements Runnable, StorageListener,
      * true when progress() was called since the last call to madeProgress().
      * Synchronized to make sure we don't miss any progress events.
      */
-    private synchronized boolean madeProgress()
+    private synchronized boolean madeProgress ()
     {
         boolean result = progress;
         progress = false;
@@ -466,7 +461,7 @@ public class SnarkGnome implements Runnable, StorageListener,
      * Sets upload and download rates texts. Used for everything gtk+/gnome
      * since that seems the most thread save way.
      */
-    public boolean fire()
+    public boolean fire ()
     {
         // XXX - Little bit of a hack, when the close box has been pressed
         // anything to do with the main window seems to crash...
@@ -493,7 +488,7 @@ public class SnarkGnome implements Runnable, StorageListener,
 
         // Calculate and update download and upload speeds
         if (_snark.coordinator != null
-                && (activity == COLLECTING || activity == SHARING)) {
+            && (activity == COLLECTING || activity == SHARING)) {
             // Calculate and show download rate.
             long downloaded = _snark.coordinator.getDownloaded();
             long diff = downloaded - lastDownloaded;
@@ -549,7 +544,7 @@ public class SnarkGnome implements Runnable, StorageListener,
             ProgressBar progressBar = appbar.getProgressBar();
 
             if (activity == ALLOCATING || activity == CHECKING
-                    || activity == COLLECTING) {
+                || activity == COLLECTING) {
                 progressBar.setFraction(progress);
                 progressBar.setText(percentage + "%");
             } else {
@@ -570,7 +565,7 @@ public class SnarkGnome implements Runnable, StorageListener,
 
     protected Snark _snark;
 
-    public boolean lifeCycleQuery(LifeCycleEvent arg0)
+    public boolean lifeCycleQuery (LifeCycleEvent arg0)
     {
         // TODO Auto-generated method stub
         return false;

@@ -57,14 +57,14 @@ public class GnomeInfoWindow implements ButtonListener, LifeCycleListener
 
     private int peers;
 
-    GnomeInfoWindow(Snark snark)
+    GnomeInfoWindow (Snark snark)
     {
         _snark = snark;
         peersWindow = new GnomePeerList(_snark);
     }
 
     // Creates and returns the top level Widget
-    private Widget create()
+    private Widget create ()
     {
         // Name of the file we are sharing
         HBox nameBox = new HBox(false, 6);
@@ -128,7 +128,7 @@ public class GnomeInfoWindow implements ButtonListener, LifeCycleListener
         length.setJustification(Justification.RIGHT);
         length.setAlignment(0d, 0.5d);
         String totalString = _snark.meta.getTotalLength() / (1024 * 1024)
-                + " MB";
+            + " MB";
         Label total = new Label(totalString);
         total.setJustification(Justification.LEFT);
         total.setAlignment(0d, 0.5d);
@@ -193,10 +193,10 @@ public class GnomeInfoWindow implements ButtonListener, LifeCycleListener
     /**
      * Handles Life Cycle events (Window close or delete).
      */
-    public void lifeCycleEvent(LifeCycleEvent event)
+    public void lifeCycleEvent (LifeCycleEvent event)
     {
         if (event.isOfType(LifeCycleEvent.Type.DELETE)
-                || event.isOfType(LifeCycleEvent.Type.DESTROY)) {
+            || event.isOfType(LifeCycleEvent.Type.DESTROY)) {
             window = null;
         }
     }
@@ -204,7 +204,7 @@ public class GnomeInfoWindow implements ButtonListener, LifeCycleListener
     /**
      * Handles buttons (Peers, Close).
      */
-    public void buttonEvent(ButtonEvent event)
+    public void buttonEvent (ButtonEvent event)
     {
         if (event.isOfType(ButtonEvent.Type.CLICK)) {
             Object source = event.getSource();
@@ -215,12 +215,12 @@ public class GnomeInfoWindow implements ButtonListener, LifeCycleListener
                 window = null;
             } else {
                 System.err.println("Unknow event: " + event + " from source: "
-                        + source);
+                    + source);
             }
         }
     }
 
-    void show()
+    void show ()
     {
         if (window != null) {
             window.present();
@@ -239,7 +239,7 @@ public class GnomeInfoWindow implements ButtonListener, LifeCycleListener
     }
 
     // Update the number of peers and the peers window.
-    void update(int peers)
+    void update (int peers)
     {
         if (window != null && this.peers != peers) {
             this.peers = peers;
@@ -248,7 +248,7 @@ public class GnomeInfoWindow implements ButtonListener, LifeCycleListener
         peersWindow.update();
     }
 
-    public boolean lifeCycleQuery(LifeCycleEvent arg0)
+    public boolean lifeCycleQuery (LifeCycleEvent arg0)
     {
         // TODO Auto-generated method stub
         return false;

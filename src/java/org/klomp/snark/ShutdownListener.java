@@ -30,5 +30,5 @@ public interface ShutdownListener
      * Called when the SnarkShutdown hook has finished shutting down all
      * subcomponents.
      */
-    void shutdown();
+    void shutdown ();
 }

@@ -72,8 +72,8 @@ public class PeerCoordinator implements PeerListener
 
     private final CoordinatorListener listener;
 
-    public PeerCoordinator(byte[] id, MetaInfo metainfo, Storage storage,
-            CoordinatorListener listener)
+    public PeerCoordinator (byte[] id, MetaInfo metainfo, Storage storage,
+        CoordinatorListener listener)
     {
         this.id = id;
         this.metainfo = metainfo;
@@ -94,17 +94,17 @@ public class PeerCoordinator implements PeerListener
         timer.schedule(new PeerCheckerTask(this), CHECK_PERIOD, CHECK_PERIOD);
     }
 
-    public byte[] getID()
+    public byte[] getID ()
     {
         return id;
     }
 
-    public boolean completed()
+    public boolean completed ()
     {
         return storage.complete();
     }
 
-    public int getPeers()
+    public int getPeers ()
     {
         synchronized (peers) {
             return peers.size();
@@ -114,7 +114,7 @@ public class PeerCoordinator implements PeerListener
     /**
      * Returns how many bytes are still needed to get the complete file.
      */
-    public long getLeft()
+    public long getLeft ()
     {
         // XXX - Only an approximation.
         return storage.needed() * metainfo.getPieceLength(0);
@@ -123,7 +123,7 @@ public class PeerCoordinator implements PeerListener
     /**
      * Returns the total number of uploaded bytes of all peers.
      */
-    public long getUploaded()
+    public long getUploaded ()
     {
         return uploaded;
     }
@@ -131,24 +131,24 @@ public class PeerCoordinator implements PeerListener
     /**
      * Returns the total number of downloaded bytes of all peers.
      */
-    public long getDownloaded()
+    public long getDownloaded ()
     {
         return downloaded;
     }
 
-    public MetaInfo getMetaInfo()
+    public MetaInfo getMetaInfo ()
     {
         return metainfo;
     }
 
-    public boolean needPeers()
+    public boolean needPeers ()
     {
         synchronized (peers) {
             return !halted && peers.size() < MAX_CONNECTIONS;
         }
     }
 
-    public void halt()
+    public void halt ()
     {
         halted = true;
         synchronized (peers) {
@@ -165,7 +165,7 @@ public class PeerCoordinator implements PeerListener
         }
     }
 
-    public void connected(Peer peer)
+    public void connected (Peer peer)
     {
         if (halted) {
             peer.disconnect(false);
@@ -192,7 +192,7 @@ public class PeerCoordinator implements PeerListener
         }
     }
 
-    private static boolean peerIDInList(PeerID pid, List peers)
+    private static boolean peerIDInList (PeerID pid, List peers)
     {
         Iterator it = peers.iterator();
         while (it.hasNext()) {
@@ -203,7 +203,7 @@ public class PeerCoordinator implements PeerListener
         return false;
     }
 
-    public void addPeer(final Peer peer)
+    public void addPeer (final Peer peer)
     {
         if (halted) {
             peer.disconnect(false);
@@ -220,7 +220,7 @@ public class PeerCoordinator implements PeerListener
             final PeerListener listener = this;
             final BitField bitfield = storage.getBitField();
             Runnable r = new Runnable() {
-                public void run()
+                public void run ()
                 {
                     peer.runConnection(listener, bitfield);
                 }
@@ -231,14 +231,14 @@ public class PeerCoordinator implements PeerListener
             if (peer.isConnected()) {
                 log.log(Level.FINER, "Add peer already connected: " + peer);
             } else {
-                log.log(Level.FINER, "MAX_CONNECTIONS = " + MAX_CONNECTIONS +
-                    " not accepting extra peer: " + peer);
+                log.log(Level.FINER, "MAX_CONNECTIONS = " + MAX_CONNECTIONS
+                    + " not accepting extra peer: " + peer);
             }
         }
     }
 
     // (Optimistically) unchoke. Should be called with peers synchronized
-    void unchokePeer()
+    void unchokePeer ()
     {
         // linked list will contain all interested peers that we choke.
         // At the start are the peers that have us unchoked at the end the
@@ -248,7 +248,7 @@ public class PeerCoordinator implements PeerListener
         while (it.hasNext()) {
             Peer peer = (Peer)it.next();
             if (uploaders < MAX_UPLOADERS && peer.isChoking()
-                    && peer.isInterested()) {
+                && peer.isInterested()) {
                 if (!peer.isChoked()) {
                     interested.add(0, peer);
                 } else {
@@ -268,7 +268,7 @@ public class PeerCoordinator implements PeerListener
         }
     }
 
-    public byte[] getBitMap()
+    public byte[] getBitMap ()
     {
         return storage.getBitField().getFieldBytes();
     }
@@ -276,7 +276,7 @@ public class PeerCoordinator implements PeerListener
     /**
      * Returns true if we don't have the given piece yet.
      */
-    public boolean gotHave(Peer peer, int piece)
+    public boolean gotHave (Peer peer, int piece)
     {
         if (listener != null) {
             listener.peerChange(this, peer);
@@ -291,7 +291,7 @@ public class PeerCoordinator implements PeerListener
      * Returns true if the given bitfield contains at least one piece we are
      * interested in.
      */
-    public boolean gotBitField(Peer peer, BitField bitfield)
+    public boolean gotBitField (Peer peer, BitField bitfield)
     {
         if (listener != null) {
             listener.peerChange(this, peer);
@@ -313,7 +313,7 @@ public class PeerCoordinator implements PeerListener
      * Returns one of pieces in the given BitField that is still wanted or -1 if
      * none of the given pieces are wanted.
      */
-    public int wantPiece(Peer peer, BitField havePieces)
+    public int wantPiece (Peer peer, BitField havePieces)
     {
         if (halted) {
             return -1;
@@ -348,7 +348,7 @@ public class PeerCoordinator implements PeerListener
      * Returns a byte array containing the requested piece or null of the piece
      * is unknown.
      */
-    public byte[] gotRequest(Peer peer, int piece)
+    public byte[] gotRequest (Peer peer, int piece)
     {
         if (halted) {
             return null;
@@ -365,7 +365,7 @@ public class PeerCoordinator implements PeerListener
     /**
      * Called when a peer has uploaded some bytes of a piece.
      */
-    public void uploaded(Peer peer, int size)
+    public void uploaded (Peer peer, int size)
     {
         uploaded += size;
 
@@ -377,7 +377,7 @@ public class PeerCoordinator implements PeerListener
     /**
      * Called when a peer has downloaded some bytes of a piece.
      */
-    public void downloaded(Peer peer, int size)
+    public void downloaded (Peer peer, int size)
     {
         downloaded += size;
 
@@ -390,7 +390,7 @@ public class PeerCoordinator implements PeerListener
      * Returns false if the piece is no good (according to the hash). In that
      * case the peer that supplied the piece should probably be blacklisted.
      */
-    public boolean gotPiece(Peer peer, int piece, byte[] bs)
+    public boolean gotPiece (Peer peer, int piece, byte[] bs)
     {
         if (halted) {
             return true; // We don't actually care anymore.
@@ -399,8 +399,8 @@ public class PeerCoordinator implements PeerListener
         synchronized (wantedPieces) {
             Integer p = new Integer(piece);
             if (!wantedPieces.contains(p)) {
-                log.log(Level.FINER, peer + " piece " + piece +
-                    " no longer needed");
+                log.log(Level.FINER, peer + " piece " + piece
+                    + " no longer needed");
 
                 // No need to announce have piece to peers.
                 // Assume we got a good piece, we don't really care anymore.
@@ -413,8 +413,8 @@ public class PeerCoordinator implements PeerListener
                 } else {
                     // Oops. We didn't actually download this then... :(
                     downloaded -= metainfo.getPieceLength(piece);
-                    log.log(Level.INFO, "Got BAD piece " + piece + " from " +
-                        peer);
+                    log.log(Level.INFO, "Got BAD piece " + piece + " from "
+                        + peer);
                     return false; // No need to announce BAD piece to peers.
                 }
             } catch (IOException ioe) {
@@ -437,7 +437,7 @@ public class PeerCoordinator implements PeerListener
         return true;
     }
 
-    public void gotChoke(Peer peer, boolean choke)
+    public void gotChoke (Peer peer, boolean choke)
     {
         log.log(Level.FINER, "Got choke(" + choke + "): " + peer);
 
@@ -446,7 +446,7 @@ public class PeerCoordinator implements PeerListener
         }
     }
 
-    public void gotInterest(Peer peer, boolean interest)
+    public void gotInterest (Peer peer, boolean interest)
     {
         if (interest) {
             synchronized (peers) {
@@ -465,7 +465,7 @@ public class PeerCoordinator implements PeerListener
         }
     }
 
-    public void disconnected(Peer peer)
+    public void disconnected (Peer peer)
     {
         log.log(Level.FINER, "Disconnected " + peer);
 
@@ -482,6 +482,5 @@ public class PeerCoordinator implements PeerListener
         }
     }
 
-    protected static final Logger log =
-        Logger.getLogger("org.klomp.snark.peer");
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.peer");
 }

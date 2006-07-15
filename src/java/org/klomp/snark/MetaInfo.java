@@ -54,9 +54,8 @@ public class MetaInfo
 
     private byte[] torrentdata;
 
-    MetaInfo(String announce, String name, List<List<String>> files,
-            List<Long> lengths, int piece_length, byte[] piece_hashes,
-            long length)
+    MetaInfo (String announce, String name, List<List<String>> files,
+        List<Long> lengths, int piece_length, byte[] piece_hashes, long length)
     {
         this.announce = announce;
         this.name = name;
@@ -73,7 +72,7 @@ public class MetaInfo
      * Creates a new MetaInfo from the given InputStream. The InputStream must
      * start with a correctly bencoded dictonary describing the torrent.
      */
-    public MetaInfo(InputStream in) throws IOException
+    public MetaInfo (InputStream in) throws IOException
     {
         this(new BDecoder(in));
     }
@@ -82,7 +81,7 @@ public class MetaInfo
      * Creates a new MetaInfo from the given BDecoder. The BDecoder must have a
      * complete dictionary describing the torrent.
      */
-    public MetaInfo(BDecoder be) throws IOException
+    public MetaInfo (BDecoder be) throws IOException
     {
         // Note that evaluation order matters here...
         this(be.bdecodeMap().getMap());
@@ -95,7 +94,7 @@ public class MetaInfo
      * InvalidBEncodingException if the given map does not contain a valid
      * announce string or info dictonary.
      */
-    public MetaInfo(Map m) throws InvalidBEncodingException
+    public MetaInfo (Map m) throws InvalidBEncodingException
     {
         BEValue val = (BEValue)m.get("announce");
         if (val == null) {
@@ -138,7 +137,7 @@ public class MetaInfo
             val = (BEValue)info.get("files");
             if (val == null) {
                 throw new InvalidBEncodingException(
-                        "Missing length number and/or files list");
+                    "Missing length number and/or files list");
             }
 
             List list = val.getList();
@@ -168,7 +167,7 @@ public class MetaInfo
                 int path_length = path_list.size();
                 if (path_length == 0) {
                     throw new InvalidBEncodingException(
-                            "zero size file path list");
+                        "zero size file path list");
                 }
 
                 List<String> file = new ArrayList<String>(path_length);
@@ -187,7 +186,7 @@ public class MetaInfo
     /**
      * Returns the string representing the URL of the tracker for this torrent.
      */
-    public String getAnnounce()
+    public String getAnnounce ()
     {
         return announce;
     }
@@ -195,7 +194,7 @@ public class MetaInfo
     /**
      * Returns the original 20 byte SHA1 hash over the bencoded info map.
      */
-    public byte[] getInfoHash()
+    public byte[] getInfoHash ()
     {
         // XXX - Should we return a clone, just to be sure?
         return info_hash;
@@ -204,7 +203,7 @@ public class MetaInfo
     /**
      * Returns the piece hashes. Only used by storage so package local.
      */
-    byte[] getPieceHashes()
+    byte[] getPieceHashes ()
     {
         return piece_hashes;
     }
@@ -214,7 +213,7 @@ public class MetaInfo
      * toplevel directory name getFiles() will return a non-null List of file
      * name hierarchy name.
      */
-    public String getName()
+    public String getName ()
     {
         return name;
     }
@@ -223,7 +222,7 @@ public class MetaInfo
      * Returns a list of lists of file name hierarchies or null if it is a
      * single name. It has the same size as the list returned by getLengths().
      */
-    public List getFiles()
+    public List getFiles ()
     {
         // XXX - Immutable?
         return files;
@@ -234,7 +233,7 @@ public class MetaInfo
      * null if it is a single file. It has the same size as the list returned by
      * getFiles().
      */
-    public List getLengths()
+    public List getLengths ()
     {
         // XXX - Immutable?
         return lengths;
@@ -243,7 +242,7 @@ public class MetaInfo
     /**
      * Returns the number of pieces.
      */
-    public int getPieces()
+    public int getPieces ()
     {
         return piece_hashes.length / 20;
     }
@@ -256,7 +255,7 @@ public class MetaInfo
      *                when piece is equal to or greater then the number of
      *                pieces in the torrent.
      */
-    public int getPieceLength(int piece)
+    public int getPieceLength (int piece)
     {
         int pieces = getPieces();
         if (piece >= 0 && piece < pieces - 1) {
@@ -273,7 +272,7 @@ public class MetaInfo
      * array. Returns random results or IndexOutOfBoundsExceptions when the
      * piece number is unknown.
      */
-    public boolean checkPiece(int piece, byte[] bs, int off, int length)
+    public boolean checkPiece (int piece, byte[] bs, int off, int length)
     {
         // Check digest
         MessageDigest sha1;
@@ -296,25 +295,24 @@ public class MetaInfo
     /**
      * Returns the total length of the torrent in bytes.
      */
-    public long getTotalLength()
+    public long getTotalLength ()
     {
         return length;
     }
 
     @Override
-    public String toString()
+    public String toString ()
     {
         return "MetaInfo[info_hash='" + hexencode(info_hash) + "', announce='"
-                + announce + "', name='" + name + "', files=" + files
-                + ", #pieces='" + piece_hashes.length / 20
-                + "', piece_length='" + piece_length + "', length='" + length
-                + "']";
+            + announce + "', name='" + name + "', files=" + files
+            + ", #pieces='" + piece_hashes.length / 20 + "', piece_length='"
+            + piece_length + "', length='" + length + "']";
     }
 
     /**
      * Encode a byte array as a hex encoded string.
      */
-    private static String hexencode(byte[] bs)
+    private static String hexencode (byte[] bs)
     {
         StringBuffer sb = new StringBuffer(bs.length * 2);
         for (byte element : bs) {
@@ -332,13 +330,13 @@ public class MetaInfo
      * Creates a copy of this MetaInfo that shares everything except the
      * announce URL.
      */
-    public MetaInfo reannounce(String announce)
+    public MetaInfo reannounce (String announce)
     {
         return new MetaInfo(announce, name, files, lengths, piece_length,
-                piece_hashes, length);
+            piece_hashes, length);
     }
 
-    public byte[] getTorrentData()
+    public byte[] getTorrentData ()
     {
         if (torrentdata == null) {
             Map<String, Object> m = new HashMap<String, Object>();
@@ -350,7 +348,7 @@ public class MetaInfo
         return torrentdata;
     }
 
-    private Map<String, Object> createInfoMap()
+    private Map<String, Object> createInfoMap ()
     {
         Map<String, Object> info = new HashMap<String, Object>();
         info.put("name", name);
@@ -371,7 +369,7 @@ public class MetaInfo
         return info;
     }
 
-    private byte[] calculateInfoHash()
+    private byte[] calculateInfoHash ()
     {
         Map<String, Object> info = createInfoMap();
         byte[] infoBytes = BEncoder.bencode(info);

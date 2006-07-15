@@ -69,8 +69,8 @@ public class Storage
      * @exception IOException
      *                when creating and/or checking files fails.
      */
-    public Storage(MetaInfo metainfo, StorageListener listener)
-            throws IOException
+    public Storage (MetaInfo metainfo, StorageListener listener)
+        throws IOException
     {
         this.metainfo = metainfo;
         this.listener = listener;
@@ -83,8 +83,8 @@ public class Storage
      * appropriate MetaInfo file as can be announced on the given announce
      * String location.
      */
-    public Storage(File baseFile, String announce, StorageListener listener)
-            throws IOException
+    public Storage (File baseFile, String announce, StorageListener listener)
+        throws IOException
     {
         this.listener = listener;
 
@@ -129,12 +129,12 @@ public class Storage
 
         // Note that the piece_hashes are not correctly setup yet.
         metainfo = new MetaInfo(announce, baseFile.getName(), files,
-                lengthsList, piece_size, piece_hashes, total);
+            lengthsList, piece_size, piece_hashes, total);
 
     }
 
     // Creates piece hases for a new storage.
-    public void create() throws IOException
+    public void create () throws IOException
     {
         // Calculate piece_hashes
         MessageDigest digest = null;
@@ -170,7 +170,7 @@ public class Storage
         metainfo = metainfo.reannounce(metainfo.getAnnounce());
     }
 
-    private void getFiles(File base) throws IOException
+    private void getFiles (File base) throws IOException
     {
         ArrayList<File> files = new ArrayList<File>();
         addFiles(files, base);
@@ -191,15 +191,15 @@ public class Storage
         }
     }
 
-    private static void addFiles(List<File> l, File f)
+    private static void addFiles (List<File> l, File f)
     {
         if (!f.isDirectory()) {
             l.add(f);
         } else {
             File[] files = f.listFiles();
             if (files == null) {
-                log.log(Level.WARNING,
-                    "Skipping '" + f + "' not a normal file.");
+                log.log(Level.WARNING, "Skipping '" + f
+                    + "' not a normal file.");
                 return;
             }
             for (File element : files) {
@@ -211,7 +211,7 @@ public class Storage
     /**
      * Returns the MetaInfo associated with this Storage.
      */
-    public MetaInfo getMetaInfo()
+    public MetaInfo getMetaInfo ()
     {
         return metainfo;
     }
@@ -219,7 +219,7 @@ public class Storage
     /**
      * How many pieces are still missing from this storage.
      */
-    public int needed()
+    public int needed ()
     {
         return needed;
     }
@@ -227,7 +227,7 @@ public class Storage
     /**
      * Whether or not this storage contains all pieces if the MetaInfo.
      */
-    public boolean complete()
+    public boolean complete ()
     {
         return needed == 0;
     }
@@ -236,7 +236,7 @@ public class Storage
      * The BitField that tells which pieces this storage contains. Do not change
      * this since this is the current state of the storage.
      */
-    public BitField getBitField()
+    public BitField getBitField ()
     {
         return bitfield;
     }
@@ -244,7 +244,7 @@ public class Storage
     /**
      * Creates (and/or checks) all files from the metainfo file list.
      */
-    public void check() throws IOException
+    public void check () throws IOException
     {
         File base = new File(filterName(metainfo.getName()));
 
@@ -287,7 +287,7 @@ public class Storage
             long metalength = metainfo.getTotalLength();
             if (total != metalength) {
                 throw new IOException("File lengths do not add up " + total
-                        + " != " + metalength);
+                    + " != " + metalength);
             }
         }
         checkCreateFiles();
@@ -296,13 +296,13 @@ public class Storage
     /**
      * Removes 'suspicious' characters from the give file name.
      */
-    private String filterName(String name)
+    private String filterName (String name)
     {
         // XXX - Is this enough?
         return name.replace(File.separatorChar, '_');
     }
 
-    private File createFileFromNames(File base, List names) throws IOException
+    private File createFileFromNames (File base, List names) throws IOException
     {
         File f = null;
         Iterator it = names.iterator();
@@ -326,7 +326,7 @@ public class Storage
         return f;
     }
 
-    private void checkCreateFiles() throws IOException
+    private void checkCreateFiles () throws IOException
     {
         // Whether we are resuming or not,
         // if any of the files already exists we assume we are resuming.
@@ -344,7 +344,7 @@ public class Storage
                 allocateFile(i);
             } else {
                 throw new IOException("File '" + names[i]
-                        + "' exists, but has wrong length");
+                    + "' exists, but has wrong length");
             }
         }
 
@@ -371,7 +371,7 @@ public class Storage
         }
     }
 
-    private void allocateFile(int nr) throws IOException
+    private void allocateFile (int nr) throws IOException
     {
         // XXX - Is this the best way to make sure we have enough space for
         // the whole file?
@@ -396,7 +396,7 @@ public class Storage
      * Closes the Storage and makes sure that all RandomAccessFiles are closed.
      * The Storage is unusable after this.
      */
-    public void close() throws IOException
+    public void close () throws IOException
     {
         for (RandomAccessFile element : rafs) {
             synchronized (element) {
@@ -409,7 +409,7 @@ public class Storage
      * Returns a byte array containing the requested piece or null if the
      * storage doesn't contain the piece yet.
      */
-    public byte[] getPiece(int piece) throws IOException
+    public byte[] getPiece (int piece) throws IOException
     {
         if (!bitfield.get(piece)) {
             return null;
@@ -428,7 +428,7 @@ public class Storage
      * @exception IOException
      *                when some storage related error occurs.
      */
-    public boolean putPiece(int piece, byte[] bs) throws IOException
+    public boolean putPiece (int piece, byte[] bs) throws IOException
     {
         // First check if the piece is correct.
         // If we were paranoia we could copy the array first.
@@ -479,8 +479,8 @@ public class Storage
         return true;
     }
 
-    private int getUncheckedPiece(int piece, byte[] bs, int off)
-            throws IOException
+    private int getUncheckedPiece (int piece, byte[] bs, int off)
+        throws IOException
     {
         // XXX - copy/paste code from putPiece().
         long start = piece * metainfo.getPieceLength(0);
@@ -513,6 +513,5 @@ public class Storage
     }
 
     /** The Java logger used to process our log events. */
-    protected static final Logger log =
-        Logger.getLogger("org.klomp.snark.Storage");
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.Storage");
 }

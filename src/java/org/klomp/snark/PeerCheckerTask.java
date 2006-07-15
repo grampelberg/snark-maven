@@ -33,18 +33,17 @@ import java.util.logging.Logger;
  */
 class PeerCheckerTask extends TimerTask
 {
-    private static final long KILOPERSECOND =
-        1024 * (PeerCoordinator.CHECK_PERIOD / 1000);
+    private static final long KILOPERSECOND = 1024 * (PeerCoordinator.CHECK_PERIOD / 1000);
 
     private final PeerCoordinator coordinator;
 
-    PeerCheckerTask(PeerCoordinator coordinator)
+    PeerCheckerTask (PeerCoordinator coordinator)
     {
         this.coordinator = coordinator;
     }
 
     @Override
-    public void run()
+    public void run ()
     {
         synchronized (coordinator.peers) {
             // Calculate total uploading and worst downloader.
@@ -105,24 +104,21 @@ class PeerCheckerTask extends TimerTask
                 downloaded += download;
                 peer.resetCounters();
 
-                log.log(Level.FINEST, peer + ":" +
-                    " ul: " + upload / KILOPERSECOND +
-                    " dl: " + download / KILOPERSECOND +
-                    " i: " + peer.isInterested() +
-                    " I: " + peer.isInteresting() +
-                    " c: " + peer.isChoking() +
-                    " C: " + peer.isChoked());
+                log.log(Level.FINEST, peer + ":" + " ul: " + upload
+                    / KILOPERSECOND + " dl: " + download / KILOPERSECOND
+                    + " i: " + peer.isInterested() + " I: "
+                    + peer.isInteresting() + " c: " + peer.isChoking() + " C: "
+                    + peer.isChoked());
 
                 // If we are at our max uploaders and we have lots of other
                 // interested peers try to make some room.
                 // (Note use of coordinator.uploaders)
                 if (coordinator.uploaders >= PeerCoordinator.MAX_UPLOADERS
-                        && interested > PeerCoordinator.MAX_UPLOADERS
-                        && !peer.isChoking()) {
+                    && interested > PeerCoordinator.MAX_UPLOADERS
+                    && !peer.isChoking()) {
                     // Check if it still wants pieces from us.
                     if (!peer.isInterested()) {
-                        log.log(Level.FINER, "Choke uninterested peer: " +
-                            peer);
+                        log.log(Level.FINER, "Choke uninterested peer: " + peer);
                         peer.setChoking(true);
                         uploaders--;
                         coordinator.uploaders--;
@@ -141,7 +137,7 @@ class PeerCheckerTask extends TimerTask
                         it.remove();
                         removed.add(peer);
                     } else if (peer.isInteresting() && !peer.isChoked()
-                            && download == 0) {
+                        && download == 0) {
                         // We are downloading but didn't receive anything...
                         log.log(Level.FINEST,
                             "Choke downloader that doesn't deliver:" + peer);
@@ -166,10 +162,10 @@ class PeerCheckerTask extends TimerTask
 
             // Remove the worst downloader if needed.
             if (uploaders >= PeerCoordinator.MAX_UPLOADERS
-                    && interested > PeerCoordinator.MAX_UPLOADERS
-                    && worstDownloader != null) {
-                log.log(Level.FINEST, "Choke worst downloader: " +
-                    worstDownloader);
+                && interested > PeerCoordinator.MAX_UPLOADERS
+                && worstDownloader != null) {
+                log.log(Level.FINEST, "Choke worst downloader: "
+                    + worstDownloader);
 
                 worstDownloader.setChoking(true);
                 coordinator.uploaders--;
@@ -187,6 +183,5 @@ class PeerCheckerTask extends TimerTask
         }
     }
 
-    protected static final Logger log =
-        Logger.getLogger("org.klomp.snark.peer");
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.peer");
 }

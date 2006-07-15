@@ -45,8 +45,8 @@ public class ConnectionAcceptor implements Runnable
 
     private boolean stop;
 
-    public ConnectionAcceptor(ServerSocket serverSocket,
-            HttpAcceptor httpacceptor, PeerAcceptor peeracceptor)
+    public ConnectionAcceptor (ServerSocket serverSocket,
+        HttpAcceptor httpacceptor, PeerAcceptor peeracceptor)
     {
         this.serverSocket = serverSocket;
         this.httpacceptor = httpacceptor;
@@ -58,10 +58,10 @@ public class ConnectionAcceptor implements Runnable
     public void start ()
     {
         thread = new Thread(this);
-        thread.start();        
+        thread.start();
     }
 
-    public void halt()
+    public void halt ()
     {
         stop = true;
 
@@ -79,27 +79,27 @@ public class ConnectionAcceptor implements Runnable
         }
     }
 
-    public int getPort()
+    public int getPort ()
     {
         return serverSocket.getLocalPort();
     }
 
-    public void run()
+    public void run ()
     {
         while (!stop) {
             try {
                 final Socket socket = serverSocket.accept();
                 Thread t = new Thread("Connection-" + socket) {
                     @Override
-                    public void run()
+                    public void run ()
                     {
                         try {
                             InputStream in = socket.getInputStream();
                             OutputStream out = socket.getOutputStream();
                             BufferedInputStream bis = new BufferedInputStream(
-                                    in);
+                                in);
                             BufferedOutputStream bos = new BufferedOutputStream(
-                                    out);
+                                out);
 
                             // See what kind of connection it is.
                             if (httpacceptor != null) {
@@ -108,17 +108,15 @@ public class ConnectionAcceptor implements Runnable
                                 int len = bis.read(scratch);
                                 if (len != 4) {
                                     throw new IOException(
-                                            "Need at least 4 bytes");
+                                        "Need at least 4 bytes");
                                 }
                                 bis.reset();
                                 if (scratch[0] == 19 && scratch[1] == 'B'
-                                        && scratch[2] == 'i'
-                                        && scratch[3] == 't') {
+                                    && scratch[2] == 'i' && scratch[3] == 't') {
                                     peeracceptor.connection(socket, bis, bos);
                                 } else if (scratch[0] == 'G'
-                                        && scratch[1] == 'E'
-                                        && scratch[2] == 'T'
-                                        && scratch[3] == ' ') {
+                                    && scratch[1] == 'E' && scratch[2] == 'T'
+                                    && scratch[3] == ' ') {
                                     httpacceptor.connection(socket, bis, bos);
                                 }
                             } else {
@@ -146,6 +144,5 @@ public class ConnectionAcceptor implements Runnable
     }
 
     /** The Java logger used to process our log events. */
-    protected static final Logger log =
-        Logger.getLogger("org.klomp.snark.server");
+    protected static final Logger log = Logger.getLogger("org.klomp.snark.server");
 }

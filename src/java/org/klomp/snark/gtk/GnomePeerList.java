@@ -71,12 +71,12 @@ class GnomePeerList implements LifeCycleListener
 
     private DataColumnBoolean chokedBlock;
 
-    public GnomePeerList(Snark snark)
+    public GnomePeerList (Snark snark)
     {
         _snark = snark;
     }
 
-    private void create()
+    private void create ()
     {
         // Setup model
         idBlock = new DataColumnString();
@@ -115,33 +115,33 @@ class GnomePeerList implements LifeCycleListener
         CellRenderer addressRenderer = new CellRendererText();
         addressColumn.packStart(addressRenderer, true);
         addressColumn.addAttributeMapping(addressRenderer,
-                CellRendererText.Attribute.TEXT, addressBlock);
+            CellRendererText.Attribute.TEXT, addressBlock);
         addressColumn.setResizable(true);
         addressColumn.setReorderable(true);
         CellRenderer interestedRenderer = new CellRendererToggle();
         interestedColumn.packStart(interestedRenderer, false);
         interestedColumn.addAttributeMapping(interestedRenderer,
-                CellRendererToggle.Attribute.ACTIVE, interestedBlock);
+            CellRendererToggle.Attribute.ACTIVE, interestedBlock);
         interestedColumn.setReorderable(true);
         CellRenderer interestingRenderer = new CellRendererToggle();
         interestingColumn.packStart(interestingRenderer, false);
         interestingColumn.addAttributeMapping(interestingRenderer,
-                CellRendererToggle.Attribute.ACTIVE, interestingBlock);
+            CellRendererToggle.Attribute.ACTIVE, interestingBlock);
         interestingColumn.setReorderable(true);
         CellRenderer chokingRenderer = new CellRendererToggle();
         chokingColumn.packStart(chokingRenderer, false);
         chokingColumn.addAttributeMapping(chokingRenderer,
-                CellRendererToggle.Attribute.ACTIVE, chokingBlock);
+            CellRendererToggle.Attribute.ACTIVE, chokingBlock);
         chokingColumn.setReorderable(true);
         CellRenderer chokedRenderer = new CellRendererToggle();
         chokedColumn.packStart(chokedRenderer, false);
         chokedColumn.addAttributeMapping(chokedRenderer,
-                CellRendererToggle.Attribute.ACTIVE, chokedBlock);
+            CellRendererToggle.Attribute.ACTIVE, chokedBlock);
         chokedColumn.setReorderable(true);
         CellRenderer idRenderer = new CellRendererText();
         idColumn.packStart(idRenderer, true);
         idColumn.addAttributeMapping(idRenderer,
-                CellRendererText.Attribute.TEXT, idBlock);
+            CellRendererText.Attribute.TEXT, idBlock);
         idColumn.setResizable(true);
         idColumn.setReorderable(true);
 
@@ -149,7 +149,7 @@ class GnomePeerList implements LifeCycleListener
         tree.setAlternateRowColor(true);
     }
 
-    void show()
+    void show ()
     {
         if (window != null) {
             window.present();
@@ -173,10 +173,10 @@ class GnomePeerList implements LifeCycleListener
     /**
      * Handles Life Cycle events (Window close or delete).
      */
-    public void lifeCycleEvent(LifeCycleEvent event)
+    public void lifeCycleEvent (LifeCycleEvent event)
     {
         if (event.isOfType(LifeCycleEvent.Type.DELETE)
-                || event.isOfType(LifeCycleEvent.Type.DESTROY)) {
+            || event.isOfType(LifeCycleEvent.Type.DESTROY)) {
             list.clear();
             window = null;
             tree = null;
@@ -192,19 +192,19 @@ class GnomePeerList implements LifeCycleListener
     // Keep the old, to compare with the new.
     private LinkedList<Peer> oldPeerList;
 
-    void update()
+    void update ()
     {
         // Is it time to update?
         update_counter++;
         if (window == null
-                || update_counter % (UPDATE_SEC * SnarkGnome.UPDATE_TIMER) != 0) {
+            || update_counter % (UPDATE_SEC * SnarkGnome.UPDATE_TIMER) != 0) {
             return;
         }
 
         refresh();
     }
 
-    private void refresh()
+    private void refresh ()
     {
         PeerCoordinator coordinator = _snark.coordinator;
         if (coordinator != null) {
@@ -256,7 +256,7 @@ class GnomePeerList implements LifeCycleListener
                         String id = PeerID.idencode(peerID.getID());
                         list.setValue(iter, idBlock, id);
                         String address = peerID.getAddress().getHostName()
-                                + ":" + peerID.getPort();
+                            + ":" + peerID.getPort();
                         list.setValue(iter, addressBlock, address);
                     }
 
@@ -282,7 +282,7 @@ class GnomePeerList implements LifeCycleListener
         }
     }
 
-    public boolean lifeCycleQuery(LifeCycleEvent lifecycleevent)
+    public boolean lifeCycleQuery (LifeCycleEvent lifecycleevent)
     {
         // TODO Auto-generated method stub
         return false;
