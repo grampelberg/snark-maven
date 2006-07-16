@@ -83,6 +83,23 @@ public class Snark
         this.torrent = torrent;
         this.user_port = user_port;
         this.ip = ip;
+
+        // Create a new ID and fill it with something random. First nine
+        // zeros bytes, then three bytes filled with snark and then
+        // sixteen random bytes.
+        Random random = new Random();
+        int i;
+        for (i = 0; i < 9; i++) {
+            id[i] = 0;
+        }
+        id[i++] = snark;
+        id[i++] = snark;
+        id[i++] = snark;
+        while (i < 20) {
+            id[i++] = (byte)random.nextInt(256);
+        }
+
+        log.log(Level.FINE, "My peer id: " + PeerID.idencode(id));
     }
 
     /**
@@ -114,25 +131,9 @@ public class Snark
      * and determines whether to act as a peer or seed.
      */
     public void setupNetwork ()
+        throws IOException
     {
         activity = NETWORK_SETUP;
-
-        // Create a new ID and fill it with something random. First nine
-        // zeros bytes, then three bytes filled with snark and then
-        // sixteen random bytes.
-        Random random = new Random();
-        int i;
-        for (i = 0; i < 9; i++) {
-            id[i] = 0;
-        }
-        id[i++] = snark;
-        id[i++] = snark;
-        id[i++] = snark;
-        while (i < 20) {
-            id[i++] = (byte)random.nextInt(256);
-        }
-
-        log.log(Level.FINE, "My peer id: " + PeerID.idencode(id));
 
         IOException lastException = null;
         if (user_port != -1) {
@@ -161,7 +162,7 @@ public class Snark
             }
 
             if (ip != null || user_port != -1) {
-                fatal(message, lastException);
+                abort(message, lastException);
             } else {
                 log.log(Level.WARNING, message);
             }
@@ -191,7 +192,7 @@ public class Snark
                     int code = ((HttpURLConnection)c).getResponseCode();
                     if (code / 100 != 2) {
                         // responses
-                        fatal("Loading page '" + torrent + "' gave error code "
+                        abort("Loading page '" + torrent + "' gave error code "
                             + code + ", it probably doesn't exists");
                     }
                 }
@@ -201,7 +202,7 @@ public class Snark
             // OK, so it wasn't a torrent metainfo file.
             if (f != null && f.exists()) {
                 if (ip == null) {
-                    fatal("'" + torrent + "' exists,"
+                    abort("'" + torrent + "' exists,"
                         + " but is not a valid torrent metainfo file."
                         + System.getProperty("line.separator")
                         + "  (use --share to create a torrent from it"
@@ -218,17 +219,25 @@ public class Snark
                         storage.create();
                         meta = storage.getMetaInfo();
                     } catch (IOException ioe2) {
-                        fatal("Could not create torrent for '" + torrent + "'",
+                        abort("Could not create torrent for '" + torrent + "'",
                             ioe2);
                     }
                 }
             } else {
-                fatal("Cannot open '" + torrent + "'", ioe);
+                abort("Cannot open '" + torrent + "'", ioe);
             }
         }
 
         log.log(Level.INFO, meta.toString());
+    }
 
+    /**
+     * Start the upload/download process and begins exchanging pieces
+     * with other peers.
+     */
+    public void collectPieces ()
+        throws IOException
+    {
         // When the metainfo torrent was created from an existing file/dir
         // it already exists.
         if (storage == null) {
@@ -237,17 +246,10 @@ public class Snark
                 storage = new Storage(meta, slistener);
                 storage.check();
             } catch (IOException ioe) {
-                fatal("Could not create storage", ioe);
+                abort("Could not create storage", ioe);
             }
         }
-    }
 
-    /**
-     * Start the upload/download process and begins exchanging pieces
-     * with other peers.
-     */
-    public void collectPieces ()
-    {
         activity = COLLECTING_PIECES;
         coordinator = new PeerCoordinator(id, meta, storage, clistener);
         HttpAcceptor httpacceptor;
@@ -258,7 +260,7 @@ public class Snark
             try {
                 tracker.addPeer(new PeerID(id, InetAddress.getByName(ip), port));
             } catch (UnknownHostException oops) {
-                fatal("Could not start tracker for " + ip, oops);
+                abort("Could not start tracker for " + ip, oops);
             }
             httpacceptor = new HttpAcceptor(tracker);
             byte[] torrentData = tracker.getMetaInfo().getTorrentData();
@@ -294,22 +296,20 @@ public class Snark
     /**
      * Aborts program abnormally.
      */
-    public static void fatal (String s)
-    // throws Exception
+    public static void abort (String s)
+        throws IOException
     {
-        fatal(s, null);
+        abort(s, null);
     }
 
     /**
      * Aborts program abnormally.
      */
-    public static void fatal (String s, Throwable t)
-    // throws Exception
+    public static void abort (String s, IOException ioe)
+        throws IOException
     {
-        // XXX throw an exception up to the application calling the library,
-        // instead of either System.exit()ing or swallowing it.
-        log.log(Level.SEVERE, s, t);
-        // throw (Exception)t;
+        log.log(Level.SEVERE, s, ioe);
+        throw new IOException(s);
     }
 
     /** The listen port requested by the user */

@@ -118,9 +118,25 @@
   <!-- builds our distribution files (war and jar) -->
   <target name="dist" depends="prepare,compile">
     <!-- build our various jar files -->
-    <jar destfile="${deploy.dir}/${app.name}.jar">
+    <jar destfile="${deploy.dir}/${app.name}.jar" manifest="lib/manifest.mf">
       <fileset dir="${classes.dir}" includes="org/klomp/**"/>
     </jar>
+    <jar destfile="${deploy.dir}/${app.name}-nognome.jar"
+        manifest="lib/manifest.mf">
+      <fileset dir="${classes.dir}" includes="org/klomp/**"
+        excludes="org/klomp/snark/gtk/**"/>
+    </jar>
+  </target>
+
+  <!-- Uses gcj to prepare a native binary -->
+  <target name="ndist" depends="dist">
+    <exec dir="${deploy.dir}" executable="gcj">
+      <arg line="-classpath" />
+      <arg pathref="classpath" />
+      <arg line="-o snark" />
+      <arg line="--main=org.klomp.snark.cmd.SnarkApplication" />
+      <arg line="snark-nognome.jar"/>
+    </exec>
   </target>
 
   <!-- various bits used by the retroweaver tasks -->
@@ -154,27 +170,6 @@
     <!-- now weave again with the verifier to check for unweavable 1.5isms -->
     <antcall target="vweave"><param name="which" value="base"/></antcall>
     <antcall target="vweave"><param name="which" value="distrib"/></antcall>
-  </target>
-
-  <!-- generate a class hierarchy diagram -->
-  <target name="hierviz" depends="prepare,compile">
-    <taskdef name="viztool" classname="com.samskivert.viztool.DriverTask"/>
-    <viztool visualizer="com.samskivert.viztool.hierarchy.HierarchyVisualizer"
-      pkgroot="com.threerings.miso" classes="com.threerings.miso.*"
-      output="hierviz.ps">
-      <classpath refid="classpath"/>
-    </viztool>
-  </target>
-
-  <!-- generate a class hierarchy diagram -->
-  <target name="sumgen" depends="prepare,compile">
-    <taskdef name="viztool" classname="com.samskivert.viztool.DriverTask"/>
-    <viztool visualizer="com.samskivert.viztool.summary.SummaryVisualizer"
-      pkgroot="com.threerings.miso"
-      classes="com.threerings.miso.*Scene.*"
-      output="summary.ps">
-      <classpath refid="base.classpath"/>
-    </viztool>
   </target>
 
   <!-- creates a tarball and zipfile for source distribution -->

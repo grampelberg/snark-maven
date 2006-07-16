@@ -20,6 +20,7 @@
 
 package org.klomp.snark;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -156,6 +157,7 @@ class PeerState
     }
 
     void requestMessage (int piece, int begin, int length)
+        throws IOException
     {
         log.log(Level.FINEST, peer + " rcv request(" + piece + ", " + begin
             + ", " + length + ") ");
@@ -213,6 +215,7 @@ class PeerState
      * Called when a partial piece request has been handled by PeerConnectionIn.
      */
     void pieceMessage (Request req)
+        throws IOException
     {
         int size = req.len;
         downloaded += size;

@@ -349,6 +349,7 @@ public class PeerCoordinator implements PeerListener
      * is unknown.
      */
     public byte[] gotRequest (Peer peer, int piece)
+        throws IOException
     {
         if (halted) {
             return null;
@@ -357,7 +358,7 @@ public class PeerCoordinator implements PeerListener
         try {
             return storage.getPiece(piece);
         } catch (IOException ioe) {
-            Snark.fatal("Error reading storage", ioe);
+            Snark.abort("Error reading storage", ioe);
             return null; // Never reached.
         }
     }
@@ -391,6 +392,7 @@ public class PeerCoordinator implements PeerListener
      * case the peer that supplied the piece should probably be blacklisted.
      */
     public boolean gotPiece (Peer peer, int piece, byte[] bs)
+        throws IOException
     {
         if (halted) {
             return true; // We don't actually care anymore.
@@ -418,7 +420,7 @@ public class PeerCoordinator implements PeerListener
                     return false; // No need to announce BAD piece to peers.
                 }
             } catch (IOException ioe) {
-                Snark.fatal("Error writing storage", ioe);
+                Snark.abort("Error writing storage", ioe);
             }
             wantedPieces.remove(p);
         }

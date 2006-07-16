@@ -75,7 +75,7 @@ public class SnarkShutdown extends Thread
             try {
                 storage.close();
             } catch (IOException ioe) {
-                Snark.fatal("Couldn't properly close storage", ioe);
+                log.log(Level.SEVERE, "Couldn't properly close storage", ioe);
             }
         }
 

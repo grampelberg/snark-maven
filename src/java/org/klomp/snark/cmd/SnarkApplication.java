@@ -59,8 +59,12 @@ public class SnarkApplication
         Runtime.getRuntime().addShutdownHook(hook);
 
         // Let's start grabbing files!
-        snark.setupNetwork();
-        snark.collectPieces();
+        try {
+            snark.setupNetwork();
+            snark.collectPieces();
+        } catch (IOException ioe) {
+            System.exit(-1);
+        }
 
         // If requested, periodically monitor progress.
         if (showPeers) {

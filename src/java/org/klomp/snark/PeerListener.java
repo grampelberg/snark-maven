@@ -20,6 +20,8 @@
 
 package org.klomp.snark;
 
+import java.io.IOException;
+
 /**
  * Listener for Peer events.
  */
@@ -108,8 +110,9 @@ public interface PeerListener
      *            the byte array containing the piece.
      * 
      * @return true when the bytes represent the piece, false otherwise.
+     * @throws IOException 
      */
-    boolean gotPiece (Peer peer, int piece, byte[] bs);
+    boolean gotPiece (Peer peer, int piece, byte[] bs) throws IOException;
 
     /**
      * Called when the peer wants (part of) a piece from us. Only called when
@@ -124,7 +127,7 @@ public interface PeerListener
      * @return a byte array containing the piece or null when the piece is not
      *         available (which is a protocol error).
      */
-    byte[] gotRequest (Peer peer, int piece);
+    byte[] gotRequest (Peer peer, int piece) throws IOException;
 
     /**
      * Called when a (partial) piece has been downloaded from the peer.
