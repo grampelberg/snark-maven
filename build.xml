@@ -119,12 +119,12 @@
   <target name="dist" depends="prepare,compile">
     <!-- build our various jar files -->
     <jar destfile="${deploy.dir}/${app.name}.jar" manifest="lib/manifest.mf">
-      <fileset dir="${classes.dir}" includes="org/klomp/**"/>
-    </jar>
-    <jar destfile="${deploy.dir}/${app.name}-nognome.jar"
-        manifest="lib/manifest.mf">
       <fileset dir="${classes.dir}" includes="org/klomp/**"
         excludes="org/klomp/snark/gtk/**"/>
+    </jar>
+    <jar destfile="${deploy.dir}/${app.name}-gtk.jar"
+        manifest="lib/manifest-gtk.mf">
+      <fileset dir="${classes.dir}" includes="org/klomp/**"/>
     </jar>
   </target>
 
@@ -135,7 +135,7 @@
       <arg pathref="classpath" />
       <arg line="-o snark" />
       <arg line="--main=org.klomp.snark.cmd.SnarkApplication" />
-      <arg line="snark-nognome.jar"/>
+      <arg line="snark.jar"/>
     </exec>
   </target>
 
