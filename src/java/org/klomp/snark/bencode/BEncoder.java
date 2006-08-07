@@ -160,7 +160,7 @@ public class BEncoder
         List<String> l = new ArrayList<String>(s);
         Collections.sort(l);
 
-        for (String key : s) {
+        for (String key : l) {
             Object value = m.get(key);
             bencode(key, out);
             bencode(value, out);
