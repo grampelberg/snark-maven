@@ -258,12 +258,16 @@ public class Snark
                 + "/announce");
             Tracker tracker = new Tracker(m);
             try {
-                tracker.addPeer(new PeerID(id, InetAddress.getByName(ip), port));
+                tracker.addPeer(meta.getHexInfoHash(),
+                    new PeerID(id, InetAddress.getByName(ip), port));
             } catch (UnknownHostException oops) {
                 abort("Could not start tracker for " + ip, oops);
             }
             httpacceptor = new HttpAcceptor(tracker);
-            byte[] torrentData = tracker.getMetaInfo().getTorrentData();
+            // Debug code for writing out .torrent to disk
+            /*
+            byte[] torrentData = tracker.getMetaInfo(
+                meta.getHexInfoHash()).getTorrentData();
             try {
                 log.log(Level.INFO, "Writing torrent to file " + torrent
                     + ".torrent");
@@ -274,6 +278,7 @@ public class Snark
             } catch (IOException e) {
                 log.log(Level.WARNING, "Could not save torrent file.");
             }
+            */
         } else {
             httpacceptor = null;
         }
@@ -285,7 +290,7 @@ public class Snark
 
         if (ip != null) {
             log.log(Level.INFO, "Torrent available on " + "http://" + ip + ":"
-                + port + "/metainfo.torrent");
+                + port + "/" + meta.getHexInfoHash() + ".torrent");
         }
 
         trackerclient = new TrackerClient(meta, coordinator, port);

@@ -95,9 +95,10 @@ public class TrackerClient extends Thread
 
         boolean completed = (left == 0);
 
+        boolean started = false;
         try {
-            boolean started = false;
-            while (!started) {
+            int failures = 0;
+            while (!started && failures < 2) {
                 try {
                     // Send start.
                     TrackerInfo info = doRequest(announce, infoHash, peerID,
@@ -113,11 +114,12 @@ public class TrackerClient extends Thread
                         + announce, ioe);
                 }
 
-                if (!started && !stop) {
-                    log.log(Level.FINER, "         Retrying in one minute...");
+                if (!started) {
+                    failures++;
+                    log.log(Level.FINER, "     Retrying in 5s...");
                     try {
-                        // Sleep one minutes...
-                        Thread.sleep(60 * 1000);
+                        // Sleep five seconds...
+                        Thread.sleep(5 * 1000);
                     } catch (InterruptedException interrupt) {
                         // ignore
                     }
@@ -171,8 +173,10 @@ public class TrackerClient extends Thread
             log.log(Level.SEVERE, "Fatal exception in TrackerClient", t);
         } finally {
             try {
-                doRequest(announce, infoHash, peerID, uploaded, downloaded,
-                    left, STOPPED_EVENT);
+                if (started) {
+                    doRequest(announce, infoHash, peerID, uploaded, downloaded,
+                        left, STOPPED_EVENT);
+                }
             } catch (IOException ioe) { /* ignored */
             }
         }
@@ -197,9 +201,11 @@ public class TrackerClient extends Thread
         if (c instanceof HttpURLConnection) {
             // Check whether the page exists
             int code = ((HttpURLConnection)c).getResponseCode();
-            if (code / 100 != 2) {
+            if (code == HttpURLConnection.HTTP_FORBIDDEN) {
+                throw new IOException("Tracker doesn't handle given info_hash");
+            } else if (code / 100 != 2) {
                 throw new IOException("Loading '" + s + "' gave error code "
-                    + code + ", it probably doesn't exists");
+                    + code + ", it probably doesn't exist");
             }
         }
 

@@ -44,7 +44,6 @@ public class HttpAcceptor
         + "<body>"
         + "<h1>Snark Client</h1>"
         + "<p>Snark is a client for downloading and sharing files distributed with the BitTorrent protocol. It is not a normal webserver.</p>"
-        + "<p><a href=\"metainfo.torrent\">Torrent</a></p>"
         + "<p><a href=\"announce\">Tracker</a></p>"
         + "<hr><p>For more info see <a href=\"http://www.klomp.org/snark/\">The Hunting of the Snark Project</a></p>"
         + "</body>" + "</html>";
@@ -106,9 +105,15 @@ public class HttpAcceptor
                 byte[] response = tracker.handleRequest(sock.getInetAddress(),
                     sock.getPort(), params);
                 sendData(bos, response, "application/octet-stream");
-            } else if (resource.equals("/metainfo.torrent")) {
-                byte[] torrent = tracker.getMetaInfo().getTorrentData();
-                sendData(bos, torrent, "application/x-bittorrent");
+            } else if (resource.endsWith(".torrent")) {
+                MetaInfo info = tracker.getMetaInfo(
+                    resource.substring(1, resource.length() - 8));
+                if (info != null) {
+                    byte[] torrent = info.getTorrentData();
+                    sendData(bos, torrent, "application/x-bittorrent");
+                } else {
+                    sendError(bos, 404, "Unable to locate that hash.");
+                }
             } else {
                 sendError(bos, 404, "Snark Client. Not a real webserver.");
             }
@@ -120,7 +125,7 @@ public class HttpAcceptor
     }
 
     /**
-     * Processes an incomming HTTP request. Only handles the most basic GET
+     * Processes an incoming HTTP request. Only handles the most basic GET
      * requests. Returns the (URLEncoded) requested resource or null if the
      * request wasn't a valid GET request.
      */

@@ -200,6 +200,11 @@ public class MetaInfo
         return info_hash;
     }
 
+    public String getHexInfoHash ()
+    {
+        return hexencode(info_hash);
+    }
+
     /**
      * Returns the piece hashes. Only used by storage so package local.
      */

@@ -343,8 +343,10 @@ public class Storage
             } else if (length == 0) {
                 allocateFile(i);
             } else {
-                throw new IOException("File '" + names[i]
-                    + "' exists, but has wrong length");
+                log.log(Level.WARNING, "File '" + names[i]
+                    + "' exists, but has wrong length; forcing");
+                rafs[i].setLength(length);
+                allocateFile(i);
             }
         }
 

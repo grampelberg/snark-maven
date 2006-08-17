@@ -23,7 +23,6 @@ package org.klomp.snark;
 import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,24 +41,42 @@ public class Tracker
 {
     private static final int INTERVAL_SEC = 15 * 60; // 15 minutes.
 
-    private final MetaInfo metainfo;
+    private final Map<String, MetaInfo> metainfo =
+        new HashMap<String, MetaInfo>();
 
-    private Set<PeerID> peers = new HashSet<PeerID>();
+    private final Set<String> info_hashes = new HashSet<String>();
 
-    public Tracker (MetaInfo metainfo)
+    private Map<String, HashSet<PeerID>> peers =
+        new HashMap<String, HashSet<PeerID>>();
+
+    public Tracker (HashSet<String> hashes)
     {
-        this.metainfo = metainfo;
+        for (String hash : hashes) {
+            info_hashes.add(hash);
+            peers.put(hash, new HashSet<PeerID>());
+        }
     }
 
-    public MetaInfo getMetaInfo ()
+    public Tracker (MetaInfo info)
     {
-        return metainfo;
+        String hash = info.getHexInfoHash();
+        info_hashes.add(hash);
+        metainfo.put(hash, info);
+        peers.put(hash, new HashSet<PeerID>());
     }
 
-    public void addPeer (PeerID peer)
+    public MetaInfo getMetaInfo (String hash)
     {
-        synchronized (peers) {
-            peers.add(peer);
+        return metainfo.get(hash);
+    }
+
+    public void addPeer (String info_hash, PeerID peer)
+    {
+        HashSet<PeerID> peerset = peers.get(info_hash);
+        if (peerset != null) {
+            synchronized (peerset) {
+                peerset.add(peer);
+            }
         }
     }
 
@@ -68,14 +85,19 @@ public class Tracker
         log.log(Level.FINE, "TrackerReq " + address + ":" + port + " -> "
             + params);
 
-        byte[] info_hash;
         String info_hash_value = (String)params.get("info_hash");
         if (info_hash_value == null) {
             return failure("No info_hash given");
         }
+        info_hash_value = info_hash_value.replace("%", "");
 
-        info_hash = urldecode(info_hash_value);
-        if (!Arrays.equals(metainfo.getInfoHash(), info_hash)) {
+        boolean found = false;
+        for (String hash : info_hashes) {
+            if (hash.equals(info_hash_value)) {
+                found = true;
+            }
+        }
+        if (!found) {
             return failure("Tracker doesn't handle given info_hash");
         }
 
@@ -116,17 +138,18 @@ public class Tracker
         PeerID peer = new PeerID(peer_id, address, peer_port);
 
         Map<String, Object> response = new HashMap<String, Object>();
-        synchronized (peers) {
+        Set<PeerID> peerset = peers.get(info_hash_value);
+        synchronized (peerset) {
             String event = (String)params.get("event");
             if ("stopped".equals(event)) {
-                peers.remove(peer);
+                peerset.remove(peer);
             } else {
-                peers.add(peer);
+                peerset.add(peer);
             }
 
             response.put("interval", new Integer(INTERVAL_SEC));
             List<Map<String, Object>> peerList = new ArrayList<Map<String, Object>>();
-            Iterator it = peers.iterator();
+            Iterator it = peerset.iterator();
             while (it.hasNext()) {
                 PeerID peerID = (PeerID)it.next();
                 Map<String, Object> m = new HashMap<String, Object>();
