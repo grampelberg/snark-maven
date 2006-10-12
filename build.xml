@@ -18,7 +18,7 @@
   <!-- declare our classpath business -->
   <path id="classpath">
     <pathelement location="${classes.dir}"/>
-    <fileset dir="lib" includes="**/*.jar"/>
+    <fileset dir="${deploy.dir}/lib" includes="*.jar"/>
   </path>
 
   <!-- checks to see which packages are available -->
@@ -66,11 +66,15 @@
   <!-- prepares the application directories -->
   <target name="prepare">
     <mkdir dir="${deploy.dir}"/>
+    <mkdir dir="${deploy.dir}/lib"/>
     <mkdir dir="${classes.dir}"/>
     <mkdir dir="${javadoc.home}"/>
     <copy todir="${classes.dir}">
       <fileset dir="src/java" includes="**/*.properties"/>
       <fileset dir="src/java" includes="**/*.tmpl"/>
+    </copy>
+    <copy todir="${deploy.dir}/lib">
+      <fileset dir="lib" includes="**/*.jar"/>
     </copy>
   </target>
 
@@ -139,14 +143,14 @@
     </exec>
   </target>
 
-  <!-- various bits used by the retroweaver tasks -->
-  <taskdef name="weave" classpathref="classpath"
-           classname="com.rc.retroweaver.ant.RetroWeaverTask"/>
-  <property name="inpre" value="${deploy.dir}/${app.name}"/>
-  <property name="outpre" value="${deploy.dir}/retro/${app.name}"/>
-
   <!-- a helper task for 'retro' -->
   <target name="vweave">
+    <!-- various bits used by the retroweaver tasks -->
+    <taskdef name="weave" classpathref="classpath"
+           classname="com.rc.retroweaver.ant.RetroWeaverTask"/>
+    <property name="inpre" value="${deploy.dir}/${app.name}"/>
+    <property name="outpre" value="${deploy.dir}/retro/${app.name}"/>
+
     <path id="retrocp">
       <pathelement location="/usr/local/jdk1.4/jre/lib/rt.jar"/>
       <fileset dir="lib" includes="**/*.jar"/>
