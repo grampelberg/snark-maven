@@ -15,6 +15,9 @@
   <property name="javadoc.home"   value="${deploy.dir}/docs"/>
   <property name="classes.dir"    value="${deploy.dir}/classes"/>
 
+  <!-- import the library dependencies -->
+  <import file="libs-incl.xml"/>
+
   <!-- declare our classpath business -->
   <path id="classpath">
     <pathelement location="${classes.dir}"/>
