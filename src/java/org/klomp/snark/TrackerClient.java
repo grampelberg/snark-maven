@@ -93,12 +93,12 @@ public class TrackerClient extends Thread
         long downloaded = coordinator.getDownloaded();
         long left = coordinator.getLeft();
 
-        boolean completed = (left == 0);
+        boolean completed = coordinator.completed();
 
         boolean started = false;
         try {
             int failures = 0;
-            while (!started && failures < 2) {
+            while (!started && failures < MAX_FAILURE_COUNT) {
                 try {
                     // Send start.
                     TrackerInfo info = doRequest(announce, infoHash, peerID,
@@ -126,6 +126,10 @@ public class TrackerClient extends Thread
                 }
             }
 
+            if (failures >= MAX_FAILURE_COUNT) {
+                throw new IOException("Could not establish initial connection");
+            }
+
             while (!stop) {
                 try {
                     // Sleep some minutes...
@@ -144,7 +148,7 @@ public class TrackerClient extends Thread
 
                 // First time we got a complete download?
                 String event;
-                if (!completed && left == 0) {
+                if (!completed && coordinator.completed()) {
                     completed = true;
                     event = COMPLETED_EVENT;
                 } else {
@@ -169,6 +173,7 @@ public class TrackerClient extends Thread
                     }
                 }
             }
+
         } catch (Throwable t) {
             log.log(Level.SEVERE, "Fatal exception in TrackerClient", t);
         } finally {
@@ -244,4 +249,10 @@ public class TrackerClient extends Thread
 
     /** The Java logger used to process our log events. */
     protected static final Logger log = Logger.getLogger("org.klomp.snark.TrackerClient");
+
+    /**
+     * The maximum number of times that we are allowed to fail to make an
+     * initial contact with the tracker before we bail
+     */
+    protected static final int MAX_FAILURE_COUNT = 2;
 }

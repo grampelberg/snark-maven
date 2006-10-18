@@ -72,6 +72,8 @@ public class PeerCoordinator implements PeerListener
 
     private final CoordinatorListener listener;
 
+    private TrackerClient client;
+
     public PeerCoordinator (byte[] id, MetaInfo metainfo, Storage storage,
         CoordinatorListener listener)
     {
@@ -92,6 +94,11 @@ public class PeerCoordinator implements PeerListener
 
         // Install a timer to check the uploaders.
         timer.schedule(new PeerCheckerTask(this), CHECK_PERIOD, CHECK_PERIOD);
+    }
+
+    public void setTracker (TrackerClient client)
+    {
+        this.client = client;
     }
 
     public byte[] getID ()
@@ -436,6 +443,9 @@ public class PeerCoordinator implements PeerListener
             }
         }
 
+        if (completed()) {
+            client.interrupt();
+        }
         return true;
     }
 

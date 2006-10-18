@@ -21,7 +21,6 @@ package org.klomp.snark;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -295,7 +294,7 @@ public class Snark
 
         trackerclient = new TrackerClient(meta, coordinator, port);
         trackerclient.start();
-
+        coordinator.setTracker(trackerclient);
     }
 
     /**

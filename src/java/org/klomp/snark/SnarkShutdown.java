@@ -29,24 +29,13 @@ import java.util.logging.Logger;
  */
 public class SnarkShutdown extends Thread
 {
-    private final Storage storage;
-
-    private final PeerCoordinator coordinator;
-
-    private final ConnectionAcceptor acceptor;
-
-    private final TrackerClient trackerclient;
+    private final Snark snark;
 
     private final ShutdownListener listener;
 
-    public SnarkShutdown (Storage storage, PeerCoordinator coordinator,
-        ConnectionAcceptor acceptor, TrackerClient trackerclient,
-        ShutdownListener listener)
+    public SnarkShutdown (Snark snark, ShutdownListener listener)
     {
-        this.storage = storage;
-        this.coordinator = coordinator;
-        this.acceptor = acceptor;
-        this.trackerclient = trackerclient;
+        this.snark = snark;
         this.listener = listener;
     }
 
@@ -56,24 +45,24 @@ public class SnarkShutdown extends Thread
         log.log(Level.INFO, "Shutting down...");
 
         log.log(Level.FINE, "Halting ConnectionAcceptor...");
-        if (acceptor != null) {
-            acceptor.halt();
+        if (snark.acceptor != null) {
+            snark.acceptor.halt();
         }
 
         log.log(Level.FINE, "Halting TrackerClient...");
-        if (trackerclient != null) {
-            trackerclient.halt();
+        if (snark.trackerclient != null) {
+            snark.trackerclient.halt();
         }
 
         log.log(Level.FINE, "Halting PeerCoordinator...");
-        if (coordinator != null) {
-            coordinator.halt();
+        if (snark.coordinator != null) {
+            snark.coordinator.halt();
         }
 
         log.log(Level.FINE, "Closing Storage...");
-        if (storage != null) {
+        if (snark.storage != null) {
             try {
-                storage.close();
+                snark.storage.close();
             } catch (IOException ioe) {
                 log.log(Level.SEVERE, "Couldn't properly close storage", ioe);
             }

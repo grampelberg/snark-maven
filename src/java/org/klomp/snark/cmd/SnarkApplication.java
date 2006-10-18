@@ -54,8 +54,7 @@ public class SnarkApplication
                 System.exit(0);
             }
         };
-        SnarkShutdown hook = new SnarkShutdown(snark.storage,
-            snark.coordinator, snark.acceptor, snark.trackerclient, listener);
+        SnarkShutdown hook = new SnarkShutdown(snark, listener);
         Runtime.getRuntime().addShutdownHook(hook);
 
         // Let's start grabbing files!
@@ -212,6 +211,7 @@ public class SnarkApplication
                     } catch (IllegalArgumentException iae) {
                         // continue parsing arguments
                     }
+                    i++;
                 }
             } else if (args[i].equals("--port")) {
                 if (args.length - 1 < i + 1) {

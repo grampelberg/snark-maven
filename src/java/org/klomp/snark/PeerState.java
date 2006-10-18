@@ -283,11 +283,8 @@ class PeerState
 
             // Report missing requests.
             if (r != 0) {
-                String errmsg = "";
-                boolean logMissing = (log.getLevel().intValue() <= Level.FINER.intValue());
-                if (logMissing) {
-                    errmsg = "Some requests dropped, got " + req + ", wanted:";
-                }
+                String errmsg = "Some requests dropped, got " + req +
+                    ", wanted:";
                 for (int i = 0; i < r; i++) {
                     Request dropReq = outstandingRequests.remove(0);
                     outstandingRequests.add(dropReq);
@@ -298,14 +295,10 @@ class PeerState
                     /*
                      * if (!choked) out.sendRequest(dropReq);
                      */
-                    if (logMissing) {
-                        errmsg += " " + dropReq;
-                    }
+                    errmsg += " " + dropReq;
                 }
-                if (logMissing) {
-                    errmsg += " " + peer;
-                    log.log(Level.FINER, errmsg);
-                }
+                errmsg += " " + peer;
+                log.log(Level.FINER, errmsg);
             }
             outstandingRequests.remove(0);
         }
