@@ -343,9 +343,9 @@ public class Storage
             } else if (length == 0) {
                 allocateFile(i);
             } else {
-                log.log(Level.WARNING, "File '" + names[i]
-                    + "' exists, but has wrong length; forcing");
-                rafs[i].setLength(length);
+                log.log(Level.FINE, "Truncating '" + names[i]
+                    + "' from " + lengths + " to " + lengths[i] + "bytes");
+                rafs[i].setLength(lengths[i]);
                 allocateFile(i);
             }
         }

@@ -16,6 +16,7 @@
   <property name="classes.dir"    value="${deploy.dir}/classes"/>
 
   <!-- import the library dependencies -->
+  <property name="projects.root" value="."/>
   <import file="libs-incl.xml"/>
 
   <!-- declare our classpath business -->

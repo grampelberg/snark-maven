@@ -44,7 +44,7 @@ public class TrackerClient extends Thread
 
     private static final String STOPPED_EVENT = "stopped";
 
-    private final static int SLEEP = 5; // 5 minutes.
+    private final static int SLEEP = 1; // Check in with tracker every minute
 
     private final MetaInfo meta;
 

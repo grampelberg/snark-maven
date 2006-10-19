@@ -17,7 +17,7 @@ public class ConsoleStorageReporter implements StorageListener
 {
     public void storageCreateFile (Storage storage, String name, long length)
     {
-        log.log(Level.INFO, "Creating file '" + name + "' of length " +
+        log.log(Level.FINE, "Creating file '" + name + "' of length " +
             length + ": ");
     }
 
@@ -29,6 +29,7 @@ public class ConsoleStorageReporter implements StorageListener
         System.err.print(".");
         allocated += length;
         if (allocated == storage.getMetaInfo().getTotalLength()) {
+            System.err.println();
             log.log(Level.INFO, "Finished allocating storage space");
         }
     }

@@ -124,6 +124,19 @@ public class SnarkApplication
                         + snark.meta.getPieceLength(0) / 1024 + " KB");
                     System.out.println("Total size: "
                         + snark.meta.getTotalLength() / (1024 * 1024) + " MB");
+                } else if ("state".equals(line)) {
+                    System.out.println(
+                        snark.storage.getBitField().getHumanReadable());
+                    System.out.println("Total peers: "
+                        + snark.coordinator.getPeers());
+                    System.out.println("Total size: "
+                        + snark.meta.getTotalLength() / (1024 * 1024) + " MB");
+                    System.out.println("Total remaining: "
+                        + snark.coordinator.getLeft() / (1024 * 1024) + " MB");
+                    System.out.println("Total downloaded: "
+                        + snark.coordinator.getDownloaded());
+                    System.out.println("Total uploaded: "
+                        + snark.coordinator.getUploaded());
                 } else if ("".equals(line) || "help".equals(line)) {
                     System.out.println(usage);
                     System.out.println(help);
