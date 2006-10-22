@@ -183,8 +183,7 @@ public class Peer implements Comparable<Peer>
             // The outgoing connection has created its own Thread.
             s.in.run();
         } catch (IOException eofe) {
-            // Ignore, probably just the other side closing the connection.
-            // Or refusing the connection, timing out, etc.
+            log.log(Level.FINE, "Peer connection to " + peerID.getAddress() + " failed ", eofe);
         } catch (Throwable t) {
             log.log(Level.SEVERE, "Peer connection failed " + toString(), t);
             t.printStackTrace();

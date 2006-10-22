@@ -30,6 +30,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.Random;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -107,6 +109,10 @@ public class Snark
     public static void setLogLevel (Level level)
     {
         log.setLevel(level);
+        log.setUseParentHandlers(false);
+        Handler handler = new ConsoleHandler();
+        handler.setLevel(level);
+        log.addHandler(handler);
     }
 
     /**
