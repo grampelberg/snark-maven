@@ -114,7 +114,6 @@
              additionalparam="-breakiterator"
              link="http://www.threerings.net/code/snark/snark/docs/api">
       <classpath refid="classpath"/>
-      <exclude name="org/klomp/snark/gtk/**" unless="build.interface.gtk"/>
       <link href="http://java.sun.com/j2se/1.5/docs/api/"/>
     </javadoc>
   </target>
