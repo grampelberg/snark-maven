@@ -289,8 +289,8 @@ public class Snark
         }
 
         PeerAcceptor peeracceptor = new PeerAcceptor(coordinator);
-        ConnectionAcceptor acceptor = new ConnectionAcceptor(serversocket,
-            httpacceptor, peeracceptor);
+        acceptor = new ConnectionAcceptor(serversocket, httpacceptor,
+            peeracceptor);
         acceptor.start();
 
         if (ip != null) {
