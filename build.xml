@@ -27,35 +27,35 @@
 
   <!-- checks to see which packages are available -->
   <target name="check-available">
-    <echo message="The packages required for building are listed below."/>
-    <echo message="A package followed by 'true' indicates that the package"/>
-    <echo message="is present. One followed by '${package.present}' indicates"/>
-    <echo message="that it was not found. Jar files can be placed into the"/>
-    <echo message="lib/ directory or placed in the directory referenced"/>
-    <echo message="by your JAVA_LIBS environment variable."/>
+    <echo level="info" message="The packages required for building are listed below."/>
+    <echo level="info" message="A package followed by 'true' indicates that the package"/>
+    <echo level="info" message="is present. One followed by '${package.present}' indicates"/>
+    <echo level="info" message="that it was not found. Jar files can be placed into the"/>
+    <echo level="info" message="lib/ directory or placed in the directory referenced"/>
+    <echo level="info" message="by your JAVA_LIBS environment variable."/>
 
-    <echo message=""/>
-    <echo message="------------------------------------------"/>
-    <echo message="GTK+ libraries - http://java-gnome.sourceforge.net/"/>
-    <echo message="------------------------------------------"/>
+    <echo level="info" message=""/>
+    <echo level="info" message="------------------------------------------"/>
+    <echo level="info" message="GTK+ libraries - http://java-gnome.sourceforge.net/"/>
+    <echo level="info" message="------------------------------------------"/>
     <available property="glib.present"
      classname="org.gnu.glib.GObject" classpathref="classpath"/>
-    <echo message="GLib: ${glib.present}"/>
+    <echo level="info" message="GLib: ${glib.present}"/>
     <available property="gtk+.present"
      classname="org.gnu.gtk.Gtk" classpathref="classpath"/>
-    <echo message="GTK+: ${gtk+.present}"/>
+    <echo level="info" message="GTK+: ${gtk+.present}"/>
     <available property="gnome.present"
      classname="org.gnu.gnome.App" classpathref="classpath"/>
-    <echo message="GNOME: ${gnome.present}"/>
+    <echo level="info" message="GNOME: ${gnome.present}"/>
 </target>
 
   <!-- combines package availability into build controls -->
   <target name="compute-builds" depends="check-available">
-    <echo message="The packages that will be built are listed below. One"/>
-    <echo message="followed by 'true' indicates that it will be built. One"/>
-    <echo message="followed by '${build.package}' indicates that it will"/>
-    <echo message="not be built. If a package is not being built, one or"/>
-    <echo message="more of its dependencies could not be located."/>
+    <echo level="info" message="The packages that will be built are listed below. One"/>
+    <echo level="info" message="followed by 'true' indicates that it will be built. One"/>
+    <echo level="info" message="followed by '${build.package}' indicates that it will"/>
+    <echo level="info" message="not be built. If a package is not being built, one or"/>
+    <echo level="info" message="more of its dependencies could not be located."/>
 
     <condition property="build.interface.gtk">
       <and>
@@ -64,7 +64,7 @@
         <isset property="gnome.present"/>
       </and>
     </condition>
-    <echo message="org.klomp.snark.gtk: ${build.interface.gtk}"/>
+    <echo level="info" message="org.klomp.snark.gtk: ${build.interface.gtk}"/>
   </target>
 
   <!-- prepares the application directories -->
@@ -190,8 +190,8 @@
 
   <!-- creates a tarball and zipfile for source distribution -->
   <target name="distrib">
-     <echo message="You may want to stop and run 'ant savedoc' first."/>
-     <echo message="Building ${lib.version} tar.gz distribution..."/>
+     <echo level="info" message="You may want to stop and run 'ant savedoc' first."/>
+     <echo level="info" message="Building ${lib.version} tar.gz distribution..."/>
      <tar destfile="snark-${lib.version}.tar.gz" compression="gzip">
        <tarfileset dir=".." mode="0664" dirmode="0775">
          <include name="snark/**"/>
@@ -200,7 +200,7 @@
          <exclude name="snark/snark-*.*"/>
        </tarfileset>
      </tar>
-     <echo message="Building ${lib.version} zip distribution..."/>
+     <echo level="info" message="Building ${lib.version} zip distribution..."/>
      <zip destfile="narya-${lib.version}.zip">
        <fileset dir="..">
          <include name="snark/**"/>
